@@ -226,8 +226,10 @@ class Response():
                 "Content-Type": "{}".format(self.headers['Content-Type']),
                 "Content-Length": "{}".format(len(self._content)),
         #       "Cookie": "{}".format(reqhdr.get("Cookie", "sessionid=xyz789")), #dummy cooki
-        if request.auth:
-            headers["Authorization"] = request.auth
+        }
+        auth = getattr(request, "auth", None)
+        if auth:
+            headers["Authorization"] = auth
 
         # Header text alignment
         fmt_header = "HTTP/1.1 200 OK\r\n"
@@ -289,4 +291,13 @@ class Response():
         else:
             return self.build_notfound()
 
+        if envelop_content is not None:
+            self._content = envelop_content if isinstance(envelop_content, (bytes, bytearray)) else str(envelop_content).encode("utf-8")
+        else:
+            content_len, content = self.build_content(path, base_dir)
+            if content_len < 0:
+                return self.build_notfound()
+            self._content = content
+
+        self._header = self.build_response_header(request)
         return self._header + self._content

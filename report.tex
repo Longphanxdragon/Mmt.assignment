@@ -1,0 +1,380 @@
+% =====================
+% Original LaTeX file (kept as requested) with additional sections appended
+% =====================
+\documentclass[a4paper,12pt]{article}
+
+% ==========================================
+% 1. KHAI BÁO CÁC THƯ VIỆN (PACKAGES)
+% ==========================================
+\usepackage[utf8]{inputenc}
+\usepackage{vntex} % Hỗ trợ tiếng Việt
+\usepackage{a4wide,amssymb,epsfig,latexsym,array,hhline,fancyhdr}
+\usepackage[normalem]{ulem}
+\usepackage[makeroom]{cancel}
+\usepackage{amsmath,amsthm,amscd}
+\usepackage{multicol,longtable}
+\usepackage{diagbox}
+\usepackage{booktabs}
+\usepackage{alltt}
+\usepackage[framemethod=tikz]{mdframed}
+\usepackage{makecell}
+\usepackage{caption,subcaption}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{rotating}
+\usepackage{graphicx}
+\usepackage{geometry}
+\usepackage{setspace}
+\usepackage{float}
+\usepackage{tikz}
+\usetikzlibrary{arrows,snakes,backgrounds}
+\usepackage{lastpage}
+\usepackage[lined,boxed,commentsnumbered]{algorithm2e}
+\usepackage{enumerate}
+\usepackage{color}
+\usepackage{listings}
+\usepackage[most]{tcolorbox}
+\usepackage{tocloft}
+
+% Cấu hình link (Hyperref)
+\usepackage[unicode]{hyperref}
+\hypersetup{urlcolor=blue,linkcolor=black,citecolor=black,colorlinks=true} 
+
+% ==========================================
+% 2. CẤU HÌNH GIAO DIỆN & TÙY CHỈNH
+% ==========================================
+% Cấu hình chèn code (Listings)
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.99, 0.9, 0.85}
+\lstdefinestyle{mein_style}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\small,
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+\lstset{style=mein_style}
+
+% Cấu hình hộp ghi chú (tcolorbox)
+\newtcolorbox[auto counter]{problem}[1][]{%
+    enhanced, breakable, colback=lightblue, colbacktitle=white,
+    coltitle=black, fonttitle=\bfseries, boxrule=.9pt,
+    titlerule=.2pt, toptitle=3pt, bottomtitle=3pt, title=Code R:, #1}
+\newtcolorbox{smalldinhly}{colback = yellow!5!white,colframe=green!75!black}
+
+% Cấu hình canh lề giấy
+\def\thesislayout{    
+    \geometry{
+        a4paper,
+        total={160mm,240mm}, 
+        left=30mm,
+        top=30mm,
+    }
+}
+	hesislayout
+
+% Cấu hình Header và Footer
+\setlength{\headheight}{40pt}
+\pagestyle{fancy}
+\fancyhead{} 
+\fancyhead[L]{
+ \begin{tabular}{rl}
+    \begin{picture}(25,15)(0,0)
+    \put(0,-8){\includegraphics[width=16mm, height=10mm]{hcmut.png}}
+   \end{picture}&
+    \begin{tabular}{l}
+        	extbf{\bf \ttfamily ĐẠI HỌC QUỐC GIA TP.HCM}\\
+        	extbf{\bf \ttfamily TRƯỜNG ĐẠI HỌC BÁCH KHOA}\\
+    \end{tabular}    
+ \end{tabular}
+}
+\fancyhead[R]{}
+\fancyfoot{} 
+\fancyfoot[L]{\scriptsize \ttfamily Báo cáo Bài tập lớn Mạng Máy Tính (CO3093/CO3094)}
+\fancyfoot[R]{\scriptsize \ttfamily Trang {\thepage}/\pageref{LastPage}}
+\renewcommand{\headrulewidth}{0.3pt}
+\renewcommand{\footrulewidth}{0.3pt}
+
+% Cấu hình định dạng Heading (Mục lục và Tiêu đề)
+\renewcommand\cftsecaftersnum{.}
+\renewcommand{\thesection}{\Roman{section}}
+\renewcommand{\thesubsection}{\arabic{subsection}}
+
+% Thêm cấp độ subsubsubsection (Cấp 4)
+\setcounter{secnumdepth}{4}
+\setcounter{tocdepth}{4}
+\makeatletter
+\newcounter {subsubsubsection}[subsubsection]
+\renewcommand\thesubsubsubsection{\thesubsubsection .\@arabic\c@subsubsubsection}
+\newcommand\subsubsubsection{\@startsection{subsubsubsection}{4}{\z@}%
+                                     {-3.25ex\@plus -1ex \@minus -.2ex}%
+                                     {1.5ex \@plus .2ex}%
+                                     {\normalfont\normalsize\bfseries}}
+\newcommand*\l@subsubsubsection{\@dottedtocline{3}{10.0em}{4.1em}}
+\newcommand*{\subsubsubsectionmark}[1]{}
+\makeatother
+
+% Cấu hình khoảng cách ảnh và bảng
+\sloppy
+\captionsetup[figure]{labelfont={small,bf},textfont={small,it},belowskip=-1pt,aboveskip=5pt}
+\captionsetup[table]{labelfont={small,bf},textfont={small,it},belowskip=-1pt,aboveskip=7pt}
+\setlength{\floatsep}{5pt plus 2pt minus 2pt}
+\setlength{\textfloatsep}{5pt plus 2pt minus 2pt}
+\setlength{\intextsep}{10pt plus 2pt minus 2pt}
+
+% ==========================================
+% 3. BẮT ĐẦU NỘI DUNG VĂN BẢN (DOCUMENT)
+% ==========================================
+\begin{document}
+
+% ------ TRANG BÌA ------
+\begin{titlepage}
+\begin{center}
+ĐẠI HỌC QUỐC GIA TP.HCM \\
+TRƯỜNG ĐẠI HỌC BÁCH KHOA \\
+\end{center}
+
+\vspace{1cm}
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[width=6cm]{hcmut.png}
+\end{center}
+\end{figure}
+
+\vspace{1cm}
+
+\begin{center}
+\begin{tabular}{c}
+\multicolumn{1}{c}{\textbf{{\Large BÁO CÁO BÀI TẬP LỚN}}}\\
+\multicolumn{1}{c}{\textbf{{\Large MÔN MẠNG MÁY TÍNH}}}\\
+\multicolumn{1}{c}{\textbf{{\Large Học kỳ 2 - Năm học 2025-2026}}}\\
+\multicolumn{1}{c}{\textbf{{\Large Mã môn học: CO3093/CO3094}}}\\
+~~\\
+\hline
+\\
+	extbf{Đề tài: Assignment 1 - Implement non-blocking} \\\textbf{HTTP server and chat application} \\
+\\
+\hline
+\end{tabular}
+\end{center}
+\vspace{1.5cm}
+
+\begin{table}[h]
+\begin{tabular}{rlcl}
+\hspace{5 cm}  \textbf{Giảng viên hướng dẫn:} & \textbf{Thầy Bùi Xuân Giang}&  \\
+\hspace{5 cm}   \\
+ 	extbf{Thành viên thực hiện:}& \\
+ & Phan Thành Long - 2211891 \\
+ & Trần Quốc Hiền - 2310992\\
+ & Nguyễn Trường Giang - 2310829\\
+\end{tabular}
+\end{table}
+
+\vspace{1.5cm}
+\begin{center}
+{\footnotesize Thành Phố Hồ Chí Minh, năm 2026}
+\end{center}
+\end{titlepage}
+
+\newpage
+	ableofcontents
+\newpage
+\begin{table}[h]
+    \centering
+    \renewcommand{\arraystretch}{1.3} % Tăng khoảng cách giữa các dòng
+    \setlength{\tabcolsep}{5pt} % Điều chỉnh khoảng cách giữa các cột
+    \begin{tabular}{|c|l|c|p{5cm}|c|}  % Đổi cột "Công Việc Phụ Trách" sang p{7cm}
+        \hline
+        	extbf{STT} & \textbf{Họ và Tên} & \textbf{MSSV} & \textbf{Công Việc Phụ Trách} & \textbf{Đánh giá (\%)}\\
+        \hline
+        1 & Trần Quốc Hiền & 2310992 & Thiết kế mạng, viết báo cáo  & 100\% \\
+        \hline
+        2 & Nguyễn Trường Giang & 2310829 & Thiết kế mạng & 100\%  \\
+        \hline
+        3 & Phan Thành Long & 2211891 & Thiết kế mạng, viết báo cáo & 100\% \\
+        \hline
+    \end{tabular}
+    \caption{Bảng phân công công việc và thông tin sinh viên}
+    \label{tab:phancong}
+\end{table}
+\newpage
+% ------ NỘI DUNG BÁO CÁO ------
+\section{GIỚI THIỆU ĐỀ TÀI VÀ KIẾN TRÚC HỆ THỐNG}
+
+\subsection{Mục tiêu đề tài}
+Bài tập lớn yêu cầu việc xây dựng một hệ thống HTTP Server vận hành theo cơ chế non-blocking, đồng thời phát triển một ứng dụng Chat kết hợp mô hình Client-Server và Peer-to-Peer (P2P). Mục tiêu của dự án là giúp sinh viên nắm vững các thành phần lõi trong lập trình mạng (Network Programming), cụ thể:
+\begin{itemize}
+    \item Hiểu và vận hành các tiến trình máy chủ (Server processes) và proxy.
+    \item Triển khai cơ chế Non-blocking TCP Communication để quản lý hàng nghìn kết nối đồng thời mà không bị treo (blocking) hệ thống.
+    \item Xây dựng nền tảng WebApp (AsynapRous) hỗ trợ thiết kế RESTful API để định tuyến (routing) yêu cầu từ người dùng.
+\end{itemize}
+
+\subsection{Tổng quan kiến trúc AsynapRous}
+Hệ thống sử dụng nền tảng AsynapRous (Asynchronous Application Routing), một lightweight framework do nhóm tự xây dựng để hỗ trợ triển khai các RESTful endpoint. Framework này cung cấp khả năng:
+\begin{itemize}
+    \item Đăng ký các hàm xử lý qua Decorator \texttt{@app.route()} tương tự các framework hiện đại.
+    \item Tích hợp chặt chẽ với cơ chế Non-blocking Coroutine (Sử dụng AsyncIO) để nâng cao hiệu suất giao tiếp giữa client và server.
+    \item Thiết kế module linh hoạt gồm: Proxy Server, Backend Server và Application (SampleApp).
+\end{itemize}
+
+\newpage
+\section{TRIỂN KHAI CƠ CHẾ NON-BLOCKING}
+
+\subsection{Lựa chọn cơ chế Coroutine (AsyncIO)}
+Trong lập trình socket TCP truyền thống (Blocking mode), phương thức \texttt{recv()} hoặc \texttt{send()} sẽ dừng toàn bộ tiến trình cho đến khi dữ liệu được truyền xong. Điều này gây lãng phí tài nguyên và không thể đáp ứng cho hàng nghìn request cùng lúc.
+
+Để giải quyết, hệ thống đã ứng dụng cơ chế \textbf{Coroutine} dựa trên thư viện \texttt{asyncio} của Python.
+\begin{itemize}
+    \item Các hàm xử lý kết nối từ client được định nghĩa dưới dạng \texttt{async def}.
+    \item \texttt{StreamReader} và \texttt{StreamWriter} được sử dụng như các high-level API thay thế cho socket thuần túy để thực hiện đọc/ghi dữ liệu không đồng bộ.
+    \item Event Loop của \texttt{asyncio} sẽ tự động điều phối, tạm dừng coroutine khi chờ I/O và chuyển sang thực thi tác vụ khác, tối ưu hóa tốc độ xử lý mạng.
+\end{itemize}
+
+\subsection{Tích hợp vào HttpAdapter}
+Hàm \texttt{handle\_client\_coroutine} trong \texttt{HttpAdapter} được chịu trách nhiệm tiếp nhận và định tuyến:
+\begin{lstlisting}[language=Python]
+async def handle_client_coroutine(self, reader, writer):
+    # Đọc không đồng bộ yêu cầu từ client
+    request_data = await reader.read(4096)
+    
+    # Phân tách và khởi tạo Request object
+    # Gọi hàm xử lý (route handler) một cách bất đồng bộ
+    # Phản hồi lại cho client sử dụng writer.write()
+\end{lstlisting}
+
+\newpage
+\section{CƠ CHẾ XÁC THỰC (AUTHENTICATION)}
+
+\subsection{Cơ chế hoạt động của HTTP Cookies}
+Xác thực danh tính là một tính năng bắt buộc. Dự án đã áp dụng cơ chế quản lý trạng thái (State Management) thông qua \textbf{HTTP Cookies} (RFC 6265).
+\begin{enumerate}
+    \item Khi client đăng nhập, máy chủ sẽ tạo một phiên (session) và gửi kèm thông tin về Cookie thông qua Header \texttt{Set-Cookie} trong \texttt{Response}.
+    \item Trình duyệt của client sẽ lưu trữ Cookie này và tự động gắn nó vào \texttt{Cookie} Header trong tất cả các request tiếp theo.
+\end{enumerate}
+
+\subsection{Cài đặt trong hệ thống}
+Trong module \texttt{request.py} và \texttt{httpadapter.py}, hệ thống đã xây dựng lớp \texttt{CaseInsensitiveDict} để dễ dàng đọc và quản lý Headers. Hàm \texttt{extract\_cookies} có chức năng trích xuất toàn bộ chuỗi Cookie từ Request của client và lưu thành Dictionary, cho phép các RESTful API có thể truy xuất định danh người dùng một cách bảo mật.
+
+\newpage
+\section{ỨNG DỤNG CHAT HYBRID (CLIENT-SERVER \& P2P)}
+
+Hệ thống Chat được xây dựng trên một kết cấu Hybrid kết hợp 2 giai đoạn chính:
+
+\subsection{Giai đoạn khởi tạo (Client-Server Paradigm)}
+Một Server trung tâm chịu trách nhiệm đóng vai trò làm Tracker để lưu trữ danh sách các điểm nút mạng (Peers).
+Các API được thiết kế trong AsynapRous:
+\begin{itemize}
+    \item \texttt{[POST] /submit-info}: Khi một peer mới muốn tham gia, nó gửi IP và Port lên Tracker để đăng ký.
+    \item \texttt{[GET] /get-list}: Các peer gọi API này để tải về danh sách các peer đang trực tuyến (\texttt{active\_peers}).
+\end{itemize}
+
+\subsection{Giai đoạn truyền tin (P2P Paradigm)}
+Khi một peer đã nắm được danh sách trực tuyến, nó có thể thiết lập kết nối trực tiếp đến một peer khác mà không cần đi qua Server trung tâm.
+\begin{itemize}
+    \item \texttt{[POST] /broadcast-peer}: Chức năng gửi tin nhắn đến toàn bộ phòng chat. Hệ thống sẽ duyệt qua \texttt{active\_peers} và gửi HTTP POST chứa nội dung tin nhắn trực tiếp đến các node.
+    \item \texttt{[POST] /send-peer}: Chức năng nhắn tin trực tiếp riêng lẻ giữa hai node.
+\end{itemize}
+
+Việc sử dụng \texttt{asyncio} giúp các tác vụ Broadcast và nhận tin nhắn không làm đóng băng giao diện người dùng, đảm bảo trải nghiệm Chat mượt mà, thời gian thực.
+
+\newpage
+\section{TỔNG KẾT VÀ HƯỚNG PHÁT TRIỂN}
+
+\subsection{Tổng kết}
+Bài tập lớn đã hoàn thiện việc tự xây dựng một mô hình HTTP Server tối ưu sử dụng cơ chế Non-blocking I/O. Các thành phần lõi như Proxy, Backend, HttpAdapter, và WebApp Framework (AsynapRous) được tổ chức theo nguyên lý Module hóa chặt chẽ. Hệ thống Chat Hybrid cũng chứng minh được tính hiệu quả trong việc duy trì kết nối phân tán và định tuyến RESTful tin cậy.
+
+\subsection{Hướng phát triển}
+Trong tương lai, hệ thống có thể được nâng cấp ở những khía cạnh sau:
+\begin{itemize}
+    \item Tích hợp mã hóa bảo mật lớp Socket bằng SSL/TLS để triển khai giao thức HTTPS.
+    \item Bổ sung Websocket để thay thế phương pháp polling (gọi API liên tục) trong hệ thống Chat, từ đó giảm thiểu độ trễ mạng và số lượng Request ảo.
+    \item Cải thiện khả năng phân tải (Load Balancing) của Proxy từ cơ chế Round-robin cơ bản sang Least-connection hoặc dựa trên chỉ số phản hồi của Backend.
+\end{itemize}
+
+% --- Bổ sung nội dung triển khai, kiểm thử và phụ lục (giữ nguyên phần trên)
+\newpage
+\section{Chi tiết triển khai}
+Phần này bổ sung chi tiết triển khai nhằm làm rõ các thành phần, luồng dữ liệu và các tệp nguồn chính đã chỉnh sửa/viết mới trong quá trình thực hiện.
+
+\subsection{Các tệp tin chính (chi tiết)}
+\begin{itemize}
+  \item `CO3094-asynaprous/apps/sampleapp.py` — chứa định nghĩa các endpoint REST (đăng nhập, whoami, tracker, broadcast/send). Các handler trả về dạng tuple `(payload, extra\_headers, status)` để đơn giản hóa việc set header như `Set-Cookie` hoặc trả status code khác 200.
+  \item `CO3094-asynaprous/daemon/httpadapter.py` — chuyển đổi giữa bytes request và lời gọi handler; hỗ trợ cả đường dẫn đồng bộ và bất đồng bộ (tuple response xử lý JSON/Set-Cookie).
+  \item `CO3094-asynaprous/daemon/request.py` — phân tích request line, headers, body và cookies; sử dụng `CaseInsensitiveDict` cho headers.
+  \item `CO3094-asynaprous/daemon/response.py` — xây dựng header HTTP và content body, xử lý MIME cho tệp tĩnh.
+  \item `CO3094-asynaprous/daemon/backend.py` — khởi tạo server theo `ASYNAPROUS_MODE` (threading/callback/coroutine), truyền `routes` vào handler tương ứng.
+  \item `run-dev.sh` / `stop-dev.sh` — script giúp khởi động và dừng nhanh proxy + backend để demo.
+\end{itemize}
+
+\subsection{Luồng xử lý request (tóm tắt)}
+\begin{enumerate}
+  \item Client gửi HTTP request tới `Proxy (8080)` hoặc trực tiếp tới `Backend (9001)`.
+  \item Proxy đọc `Host` header, tra bảng cấu hình (`proxy.conf`) và forward request tới backend phù hợp.
+  \item Backend (HttpAdapter) parse request, xác định handler từ `routes` và gọi hàm xử lý.
+  \item Handler trả về payload (dict/list), kèm `extra_headers` (ví dụ `Set-Cookie`) và `status` nếu cần; HttpAdapter đóng gói lại thành HTTP response và trả về client.
+\end{enumerate}
+
+\section{Kiểm thử và kết quả (mở rộng)}
+\subsection{Các kịch bản kiểm thử đã chạy}
+\begin{itemize}
+  \item Đăng ký peer: `POST /submit-info` (xác minh `active_peers` tăng lên).
+  \item Liệt kê peer: `GET /get-list` (kiểm tra dữ liệu trả về là JSON đúng cấu trúc).
+  \item Xác thực: `POST/GET /login` sử dụng `Authorization: Basic ...` nhận `Set-Cookie`, sau đó gọi `GET /whoami` kèm Cookie để xác thực phiên.
+  \item Chạy backend ở ba chế độ `threading`, `callback`, `coroutine` và kiểm tra tính phản hồi bằng các lệnh `curl` song song/tuần tự.
+\end{itemize}
+
+\subsection{Lệnh thử nhanh (copy-paste)}
+\begin{verbatim}
+cd /workspaces/Mmt.assignment
+./run-dev.sh
+
+# Đăng ký peer
+curl -X POST "http://127.0.0.1:9001/submit-info" \
+  -H "Content-Type: application/json" \
+  -d '{"peer_id":"peer1","ip":"192.168.1.10","port":5001}'
+
+# Kiểm tra danh sách qua proxy
+curl -X GET "http://127.0.0.1:8080/get-list" -H "Host: localhost:8080"
+
+# Login (Basic Auth)
+curl -i -H "Authorization: Basic c3R1ZGVudDpwYXNzMTIz" \
+  "http://127.0.0.1:9001/login"
+
+# Dừng dịch vụ
+./stop-dev.sh
+\end{verbatim}
+
+\subsection{Ghi chú về kết quả}
+Trong môi trường thử nghiệm tại workspace này, các endpoint trên đã phản hồi như mong đợi; tracker lưu được peers, login trả `200 OK` và cung cấp cookie phiên. Ba chế độ non-blocking đều có thể khởi động và chấp nhận request (cần đảm bảo cổng không bị chiếm trước khi đổi mode).
+
+\section{Appendix A: Tệp ảnh và nội dung tĩnh}
+Trong file TeX gốc bạn có tham chiếu ảnh `hcmut.png` (logo trường) và trong mã web có `images/welcome.png`. Nếu muốn biên dịch PDF có ảnh, hãy đảm bảo hai file này nằm trong workspace, ví dụ:
+\begin{verbatim}
+CO3094-asynaprous/www/images/welcome.png
+hcmut.png
+\end{verbatim}
+
+\section{Appendix B: Gợi ý nộp bài và checklist}
+\begin{itemize}
+  \item Kiểm tra `python3 -m py_compile` để phát hiện lỗi cú pháp trước khi nén nộp.
+  \item Chạy `./run-dev.sh` rồi thử các lệnh `curl` trong phần kiểm thử để chụp ảnh màn hình demo.
+  \item Ghi lại mode đã dùng (ASYNAPROUS_MODE) và các output stdout/stderr log để kèm vào báo cáo.
+\end{itemize}
+
+\bigskip
+\noindent Cập nhật này đã được ghép vào cuối file LaTeX gốc, không xóa nội dung ban đầu.
+
+\end{document}

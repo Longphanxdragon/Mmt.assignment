@@ -23,28 +23,77 @@ import sys
 import os
 import importlib.util
 import json
+import base64
+import secrets
 
 from   daemon import AsynapRous
 
 app = AsynapRous()
 
+active_peers = []
+chat_messages = []
+sessions = {}
+
+
+def _json_tuple(payload, status=200, extra_headers=None):
+    return (payload, extra_headers or {}, status)
+
 @app.route('/login', methods=['POST'])
-def login(headers="guest", body="anonymous"):
-    """
-    Handle user login via POST request.
+def login(headers=None, body=""):
+    """Authenticate a demo user with Basic auth or JSON credentials."""
+    print("[SampleApp] Login attempt headers={} body={}".format(headers, body))
 
-    This route simulates a login process and prints the provided headers and body
-    to the console.
+    auth = headers.get('authorization') if headers else None
+    valid = False
 
-    :param headers (str): The request headers or user identifier.
-    :param body (str): The request body or login payload.
-    """
-    print("[SampleApp] Logging in {} to {}".format(headers, body))
-    data = {"message": "Welcome to the RESTful TCP WebApp"}
+    if auth and auth.lower().startswith('basic '):
+        try:
+            token = auth.split(None, 1)[1].strip()
+            decoded = base64.b64decode(token).decode('utf-8')
+            user, pwd = decoded.split(':', 1)
+            valid = user == 'student' and pwd == 'pass123'
+        except Exception:
+            valid = False
 
-    # Convert to JSON string
-    json_str = json.dumps(data)
-    return (json_str.encode("utf-8"))
+    if not valid and body:
+        try:
+            data = json.loads(body)
+            valid = data.get('user') == 'student' and data.get('pass') == 'pass123'
+        except Exception:
+            valid = False
+
+    if not valid:
+        return _json_tuple(
+            {"error": "unauthorized"},
+            401,
+            {"WWW-Authenticate": 'Basic realm="AsynapRous"'}
+        )
+
+    session_id = secrets.token_hex(16)
+    sessions[session_id] = {"user": "student"}
+    return _json_tuple(
+        {"message": "login ok", "session": session_id},
+        200,
+        {"Set-Cookie": f"sessionid={session_id}; Path=/; HttpOnly"}
+    )
+
+
+@app.route('/whoami', methods=['GET'])
+def whoami(headers=None, body=""):
+    cookie_header = headers.get('cookie') if headers else None
+    session_id = None
+
+    if cookie_header:
+        for item in cookie_header.split(';'):
+            key, _, value = item.strip().partition('=')
+            if key == 'sessionid':
+                session_id = value
+                break
+
+    if session_id in sessions:
+        return _json_tuple({"authenticated": True, "session": session_id, "user": sessions[session_id]["user"]})
+
+    return _json_tuple({"authenticated": False}, 401)
 
 @app.route("/echo", methods=["POST"])
 def echo(headers="guest", body="anonymous"):
@@ -52,15 +101,9 @@ def echo(headers="guest", body="anonymous"):
 
     try:
         message = json.loads(body)
-        data = {"received": message }
-        # Convert to JSON string
-        json_str = json.dumps(data)
-        return (json_str.encode("utf-8"))
+        return _json_tuple({"received": message})
     except json.JSONDecodeError:
-        data = {"error": "Invalid JSON"}
-        # Convert to JSON string
-        json_str = json.dumps(data)
-        return (json_str.encode("utf-8"))
+        return _json_tuple({"error": "Invalid JSON"}, 400)
 
 
 @app.route('/hello', methods=['PUT'])
@@ -86,37 +129,72 @@ def create_sampleapp(ip, port):
     app.prepare_address(ip, port)
     app.run()
 
-# --- P2P Chat Application Endpoints ---
-active_peers = []
-chat_messages = []
-
 @app.route('/submit-info', methods=['POST'])
 def submit_info(headers, body):
     try:
         peer_info = json.loads(body)
-        if peer_info not in active_peers:
-            active_peers.append(peer_info)
-        return json.dumps({"status": "success", "active_peers": active_peers}).encode("utf-8")
-    except:
-        return json.dumps({"error": "Invalid payload"}).encode("utf-8")
+        peer_id = peer_info.get('peer_id')
+        if not peer_id:
+            return _json_tuple({"error": "peer_id is required"}, 400)
+
+        normalized = {
+            "peer_id": peer_id,
+            "ip": peer_info.get('ip', '127.0.0.1'),
+            "port": peer_info.get('port'),
+        }
+
+        replaced = False
+        for index, existing in enumerate(active_peers):
+            if existing.get('peer_id') == peer_id:
+                active_peers[index] = normalized
+                replaced = True
+                break
+
+        if not replaced:
+            active_peers.append(normalized)
+
+        return _json_tuple({"status": "success", "active_peers": active_peers})
+    except Exception:
+        return _json_tuple({"error": "Invalid payload"}, 400)
 
 @app.route('/get-list', methods=['GET'])
 def get_list(headers, body):
-    return json.dumps({"active_peers": active_peers}).encode("utf-8")
+    return _json_tuple({"active_peers": active_peers})
+
+
+@app.route('/add-list', methods=['POST'])
+def add_list(headers, body):
+    return submit_info(headers, body)
+
+
+@app.route('/connect-peer', methods=['POST'])
+def connect_peer(headers, body):
+    try:
+        payload = json.loads(body)
+        peer_id = payload.get('peer_id')
+        target = next((peer for peer in active_peers if peer.get('peer_id') == peer_id), None)
+        if not target:
+            return _json_tuple({"error": "peer not found"}, 404)
+
+        return _json_tuple({"status": "ready", "peer": target})
+    except Exception:
+        return _json_tuple({"error": "Invalid payload"}, 400)
 
 @app.route('/broadcast-peer', methods=['POST'])
 def broadcast_peer(headers, body):
     try:
         msg_info = json.loads(body)
         chat_messages.append(msg_info)
-        return json.dumps({"status": "broadcasted", "messages": chat_messages}).encode("utf-8")
-    except:
-        return json.dumps({"error": "Invalid payload"}).encode("utf-8")
+        return _json_tuple({"status": "broadcasted", "messages": chat_messages})
+    except Exception:
+        return _json_tuple({"error": "Invalid payload"}, 400)
 
 @app.route('/send-peer', methods=['POST'])
 def send_peer(headers, body):
-    # Logic for direct P2P messaging
-    return json.dumps({"status": "message_sent"}).encode("utf-8")
-    app.prepare_address(ip, port)
-    app.run()
+    try:
+        msg_info = json.loads(body)
+        chat_messages.append(msg_info)
+        return _json_tuple({"status": "message_sent", "message": msg_info})
+    except Exception:
+        return _json_tuple({"error": "Invalid payload"}, 400)
 

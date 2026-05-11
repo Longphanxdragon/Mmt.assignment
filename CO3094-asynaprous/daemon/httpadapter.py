@@ -84,84 +84,99 @@ class HttpAdapter:
         self.response = Response()
 
     def handle_client(self, conn, addr, routes):
-        """
-        Handle an incoming client connection.
+        """Handle one client connection in blocking/threaded mode."""
 
-        This method reads the request from the socket, prepares the request object,
-        invokes the appropriate route handler if available, builds the response,
-        and sends it back to the client.
-
-        :param conn (socket): The client socket connection.
-        :param addr (tuple): The client's address.
-        :param routes (dict): The route mapping for dispatching requests.
-        """
-
-        # Connection handler.
-        self.conn = conn        
-        # Connection address.
-        self.connaddr = addr
-        # Request handler
+        self.conn = conn
         req = self.request
-        # Response handler
         resp = self.response
 
-        # Handle the request
         msg = conn.recv(1024).decode()
         req.prepare(msg, routes)
         print("[HttpAdapter] Invoke handle_client connection {}".format(addr))
 
-        # Handle request hook
         if req.hook:
             import json
+
             hook_result = req.hook(headers=req.headers, body=req.body)
-            body_str = json.dumps(hook_result) if isinstance(hook_result, dict) else str(hook_result)
-            response = "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\n\r\n{}".format(len(body_str), body_str).encode('utf-8')
+            if isinstance(hook_result, tuple):
+                body_obj, extra_headers, status = hook_result
+                if isinstance(body_obj, (bytes, bytearray)):
+                    body_bytes = bytes(body_obj)
+                else:
+                    if not isinstance(body_obj, (str, dict, list)):
+                        body_obj = str(body_obj)
+                    body_text = json.dumps(body_obj) if isinstance(body_obj, (dict, list)) else str(body_obj)
+                    body_bytes = body_text.encode("utf-8")
+
+                status_text = "OK" if int(status) == 200 else "ERROR"
+                header_text = f"HTTP/1.1 {status} {status_text}\r\nContent-Type: application/json\r\nContent-Length: {len(body_bytes)}\r\n"
+                for key, value in (extra_headers or {}).items():
+                    header_text += f"{key}: {value}\r\n"
+                response = header_text.encode("utf-8") + b"\r\n" + body_bytes
+            else:
+                if isinstance(hook_result, (bytes, bytearray)):
+                    body_bytes = bytes(hook_result)
+                else:
+                    body_text = json.dumps(hook_result) if isinstance(hook_result, dict) else str(hook_result)
+                    body_bytes = body_text.encode("utf-8")
+                response = (
+                    f"HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {len(body_bytes)}\r\n\r\n".encode("utf-8")
+                    + body_bytes
+                )
         else:
             response = resp.build_response(req)
 
-        #print("[HttpAdapter] Response content {}".format(response))
         conn.sendall(response)
         conn.close()
 
     async def handle_client_coroutine(self, reader, writer):
-        """
-        Handle an incoming client connection using stream reader writer asynchronously.
+        """Handle one client connection in asyncio mode."""
 
-        This method reads the request from the socket, prepares the request object,
-        invokes the appropriate route handler if available, builds the response,
-        and sends it back to the client.
-
-        :param conn (socket): The client socket connection.
-        :param addr (tuple): The client's address.
-        :param routes (dict): The route mapping for dispatching requests.
-        """
-        # Request handler
         req = self.request
-        # Response handler
         resp = self.response
 
-        print("[HttpAdapter] Invoke handle_client_coroutine connection {})".format(addr))
         addr = writer.get_extra_info("peername")
+        print("[HttpAdapter] Invoke handle_client_coroutine connection {}".format(addr))
 
-        # TODO Handle the request asynchronously
         msg = await reader.read(1024)
+        req.prepare(msg.decode("utf-8"), routes=self.routes)
 
-
-        req.prepare(msg.decode("utf-8"), routes={})
-
-        # Handle request hook
         if req.hook:
             import json
+
             if inspect.iscoroutinefunction(req.hook):
                 hook_result = await req.hook(headers=req.headers, body=req.body)
             else:
                 hook_result = req.hook(headers=req.headers, body=req.body)
-            body_str = json.dumps(hook_result) if isinstance(hook_result, dict) else str(hook_result)
-            response = "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\n\r\n{}".format(len(body_str), body_str).encode('utf-8')
+
+            if isinstance(hook_result, tuple):
+                body_obj, extra_headers, status = hook_result
+                if isinstance(body_obj, (bytes, bytearray)):
+                    body_bytes = bytes(body_obj)
+                else:
+                    if not isinstance(body_obj, (str, dict, list)):
+                        body_obj = str(body_obj)
+                    body_text = json.dumps(body_obj) if isinstance(body_obj, (dict, list)) else str(body_obj)
+                    body_bytes = body_text.encode("utf-8")
+
+                status_text = "OK" if int(status) == 200 else "ERROR"
+                header_text = f"HTTP/1.1 {status} {status_text}\r\nContent-Type: application/json\r\nContent-Length: {len(body_bytes)}\r\n"
+                for key, value in (extra_headers or {}).items():
+                    header_text += f"{key}: {value}\r\n"
+                response = header_text.encode("utf-8") + b"\r\n" + body_bytes
+            else:
+                if isinstance(hook_result, (bytes, bytearray)):
+                    body_bytes = bytes(hook_result)
+                else:
+                    body_text = json.dumps(hook_result) if isinstance(hook_result, dict) else str(hook_result)
+                    body_bytes = body_text.encode("utf-8")
+                response = (
+                    f"HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {len(body_bytes)}\r\n\r\n".encode("utf-8")
+                    + body_bytes
+                )
         else:
             response = resp.build_response(req)
 
-        # Send all the response asynchronously
         writer.write(response)
         await writer.drain()
 

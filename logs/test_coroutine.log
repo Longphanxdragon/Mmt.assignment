@@ -1,0 +1,149 @@
+[Backend] run_backend with routes={('POST', '/login'): <function login at 0x781db67bf380>, ('GET', '/whoami'): <function whoami at 0x781db5cc0c20>, ('POST', '/echo'): <function echo at 0x781db5cc0d60>, ('PUT', '/hello'): <function hello at 0x781db5cc0ea0>, ('POST', '/submit-info'): <function submit_info at 0x781db5cc1080>, ('GET', '/get-list'): <function get_list at 0x781db5cc11c0>, ('POST', '/add-list'): <function add_list at 0x781db5cc1260>, ('POST', '/connect-peer'): <function connect_peer at 0x781db5cc13a0>, ('POST', '/broadcast-peer'): <function broadcast_peer at 0x781db5cc14e0>, ('POST', '/send-peer'): <function send_peer at 0x781db5cc1620>}
+[Backend] async_server **ASYNC** listening on port 9001
+[Backend] route settings
+   + ('POST', '/login'): <function login at 0x781db67bf380>
+   + ('GET', '/whoami'): <function whoami at 0x781db5cc0c20>
+   + ('POST', '/echo'): <function echo at 0x781db5cc0d60>
+   + ('PUT', '/hello'): **ASYNC** <function hello at 0x781db5cc0ea0>
+   + ('POST', '/submit-info'): <function submit_info at 0x781db5cc1080>
+   + ('GET', '/get-list'): <function get_list at 0x781db5cc11c0>
+   + ('POST', '/add-list'): <function add_list at 0x781db5cc1260>
+   + ('POST', '/connect-peer'): <function connect_peer at 0x781db5cc13a0>
+   + ('POST', '/broadcast-peer'): <function broadcast_peer at 0x781db5cc14e0>
+   + ('POST', '/send-peer'): <function send_peer at 0x781db5cc1620>
+[Backend] Invoke handle_client_coroutine accepted connection from ('127.0.0.1', 44518)
+[HttpAdapter] Invoke handle_client_coroutine connection ('127.0.0.1', 44518)
+[Request] prepare request missg POST /submit-info HTTP/1.1
+Host: 127.0.0.1:9001
+User-Agent: curl/8.5.0
+Accept: */*
+Content-Type: application/json
+Content-Length: 52
+
+{"peer_id":"peer_async","ip":"10.0.0.1","port":6000}
+[Request] POST path /submit-info version HTTP/1.1
+[Request] Routing METHOD POST path /submit-info
+[Request] Hook has request POST /submit-info HTTP/1.1
+Host: 127.0.0.1:9001
+User-Agent: curl/8.5.0
+Accept: */*
+Content-Type: application/json
+Content-Length: 52
+
+{"peer_id":"peer_async","ip":"10.0.0.1","port":6000}
+[Backend] Invoke handle_client_coroutine accepted connection from ('127.0.0.1', 44528)
+[HttpAdapter] Invoke handle_client_coroutine connection ('127.0.0.1', 44528)
+[Request] prepare request missg GET / HTTP/1.1
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+Host: localhost:9001
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36
+Accept-Encoding: gzip, deflate, br, zstd
+Accept-Language: en-GB,en-US;q=0.9,en;q=0.8,vi;q=0.7
+Referer: https://super-space-carnival-69wwr5qx57h5v5g.github.dev/
+X-Request-ID: 013e29a078051bf7e7bb1eb10ac54cbb
+X-Real-IP: 14.169.49.161
+X-Forwarded-Port: 443
+X-Forwarded-Scheme: https
+X-Original-URI: /
+X-Scheme: https
+sec-ch-ua: "Google Chrome";v="147", "Not.A/Brand";v="8", "Chromium";v="147"
+sec-ch-ua-mobile: ?0
+sec-ch-ua-platform: "Windows"
+sec-fetch-site: same-site
+sec-fetch-mode: navigate
+sec-fetch-user: ?1
+sec-fetch-dest: document
+priority: u=0, i
+Cookie: _tt_enable_cookie=1; _ttp=01KR3TRWHBK6HG98CEFA67RQNK_.tt.1; ttcsid=1778245202477::J_N2MFzvJpV9ATIKW96s.1.1778248074796.0::1.2869488.103219
+[Request] GET path /index.html version HTTP/1.1
+[Request] Routing METHOD GET path /index.html
+[Request] Hook has request GET / HTTP/1.1
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+Host: localhost:9001
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36
+Accept-Encoding: gzip, deflate, br, zstd
+Accept-Language: en-GB,en-US;q=0.9,en;q=0.8,vi;q=0.7
+Referer: https://super-space-carnival-69wwr5qx57h5v5g.github.dev/
+X-Request-ID: 013e29a078051bf7e7bb1eb10ac54cbb
+X-Real-IP: 14.169.49.161
+X-Forwarded-Port: 443
+X-Forwarded-Scheme: https
+X-Original-URI: /
+X-Scheme: https
+sec-ch-ua: "Google Chrome";v="147", "Not.A/Brand";v="8", "Chromium";v="147"
+sec-ch-ua-mobile: ?0
+sec-ch-ua-platform: "Windows"
+sec-fetch-site: same-site
+sec-fetch-mode: navigate
+sec-fetch-user: ?1
+sec-fetch-dest: document
+priority: u=0, i
+Cookie: _tt_enable_cookie=1; _ttp=01KR3TRWHBK6HG98CEFA67RQNK_.tt.1; ttcsid=1778245202477::J_N2MFzvJpV9ATIKW96s.1.1778248074796.0::1.2869488.103219
+[Response] Start build response with req <daemon.request.Request object at 0x781db5df2c60>
+[Response] GET path /index.html mime_type text/html
+[Response] Processing main_type=text sub_type=html
+[Response] Serving the object at location www/index.html
+[Response] Serving the object at location www/index.html
+[Backend] Invoke handle_client_coroutine accepted connection from ('127.0.0.1', 44530)
+[HttpAdapter] Invoke handle_client_coroutine connection ('127.0.0.1', 44530)
+[Request] prepare request missg GET /css/styles.css HTTP/1.1
+Accept: text/css,*/*;q=0.1
+Host: localhost:9001
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36
+Accept-Encoding: gzip, deflate, br, zstd
+Accept-Language: en-GB,en-US;q=0.9,en;q=0.8,vi;q=0.7
+Referer: https://super-space-carnival-69wwr5qx57h5v5g-9001.app.github.dev/
+X-Request-ID: 4915e4cd0aed210ce337f25d19260c17
+X-Real-IP: 14.169.49.161
+X-Forwarded-Port: 443
+X-Forwarded-Scheme: https
+X-Original-URI: /css/styles.css
+X-Scheme: https
+sec-ch-ua-platform: "Windows"
+sec-ch-ua: "Google Chrome";v="147", "Not.A/Brand";v="8", "Chromium";v="147"
+sec-ch-ua-mobile: ?0
+sec-fetch-site: same-origin
+sec-fetch-mode: no-cors
+sec-fetch-dest: style
+priority: u=0
+Cookie: _tt_enable_cookie=1; _ttp=01KR3TRWHBK6HG98CEFA67RQNK_.tt.1; ttcsid=1778245202477::J_N2MFzvJpV9ATIKW96s.1.1778248074796.0::1.2869488.1032195::2872315.36.594.721::2871463.121.184; ttcsid_D3RFJ0RC77UELR3N68LG=1778245202477::sJS9y9DipPgnqlyw-x4F.1
+[Request] GET path /css/styles.css version HTTP/1.1
+[Request] Routing METHOD GET path /css/styles.css
+[Request] Hook has request GET /css/styles.css HTTP/1.1
+Accept: text/css,*/*;q=0.1
+Host: localhost:9001
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36
+Accept-Encoding: gzip, deflate, br, zstd
+Accept-Language: en-GB,en-US;q=0.9,en;q=0.8,vi;q=0.7
+Referer: https://super-space-carnival-69wwr5qx57h5v5g-9001.app.github.dev/
+X-Request-ID: 4915e4cd0aed210ce337f25d19260c17
+X-Real-IP: 14.169.49.161
+X-Forwarded-Port: 443
+X-Forwarded-Scheme: https
+X-Original-URI: /css/styles.css
+X-Scheme: https
+sec-ch-ua-platform: "Windows"
+sec-ch-ua: "Google Chrome";v="147", "Not.A/Brand";v="8", "Chromium";v="147"
+sec-ch-ua-mobile: ?0
+sec-fetch-site: same-origin
+sec-fetch-mode: no-cors
+sec-fetch-dest: style
+priority: u=0
+Cookie: _tt_enable_cookie=1; _ttp=01KR3TRWHBK6HG98CEFA67RQNK_.tt.1; ttcsid=1778245202477::J_N2MFzvJpV9ATIKW96s.1.1778248074796.0::1.2869488.1032195::2872315.36.594.721::2871463.121.184; ttcsid_D3RFJ0RC77UELR3N68LG=1778245202477::sJS9y9DipPgnqlyw-x4F.1
+[Response] Start build response with req <daemon.request.Request object at 0x781db6ab7380>
+[Response] GET path /css/styles.css mime_type text/css
+[Response] Processing main_type=text sub_type=css
+[Response] Serving the object at location static/css/styles.css
+[Response] Serving the object at location static/css/styles.css
+[Backend] Invoke handle_client_coroutine accepted connection from ('127.0.0.1', 44544)
+[HttpAdapter] Invoke handle_client_coroutine connection ('127.0.0.1', 44544)
+[Request] prepare request missg POST /submit-info HTTP/1.1
+Host: 127.0.0.1:9001
+User-Agent: curl/8.5.0
+Accept: */*
+Content-Type: application/json
+Content-Length: 52
+
+{"peer_id":"peer_async","ip":"10.0.0.1","port":6000}
+[Request] POST path /submit-info version HTTP/1.1
+[Request] Routing METHOD POST path /submit-info

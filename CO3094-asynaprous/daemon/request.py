@@ -81,7 +81,7 @@ class Request():
             if path == '/':
                 path = '/index.html'
         except Exception:
-            return None, None
+            return None, None, None
 
         return method, path, version
              
@@ -112,14 +112,18 @@ class Request():
         self.method, self.path, self.version = self.extract_request_line(request)
         print("[Request] {} path {} version {}".format(self.method, self.path, self.version))
 
+        # Parse raw header/body first, then derive normalized header map.
+        self._raw_headers, self._raw_body = self.fetch_headers_body(request)
+        self.headers = self.prepare_headers(self._raw_headers)
+        self.body = self._raw_body
+
         #
         # @bksysnet Preapring the webapp hook with AsynapRous instance
         # The default behaviour with HTTP server is empty routed
         #
         # TODO manage the webapp hook in this mounting point
         #
-        
-        if not routes == {}:
+        if routes:
             self.routes = routes
             print("[Request] Routing METHOD {} path {}".format(self.method, self.path))
             self.hook = routes.get((self.method, self.path))
@@ -129,8 +133,6 @@ class Request():
             # ...
             #
 
-        self._raw_headers = ""
-        self._raw_body =  ""
         cookies = self.headers.get('cookie', '')
         if cookies:
             self.cookies = CaseInsensitiveDict()
