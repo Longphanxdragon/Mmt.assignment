@@ -25,6 +25,9 @@ import importlib.util
 import json
 import base64
 import secrets
+import asyncio
+import urllib.request
+import urllib.error
 
 from   daemon import AsynapRous
 
@@ -37,6 +40,58 @@ sessions = {}
 
 def _json_tuple(payload, status=200, extra_headers=None):
     return (payload, extra_headers or {}, status)
+
+async def send_to_peer(peer_ip, peer_port, endpoint, message_data):
+    """
+    Send message to a peer asynchronously using HTTP POST.
+    This implements actual P2P messaging instead of just storing locally.
+    
+    :param peer_ip: IP address of target peer
+    :param peer_port: Port of target peer
+    :param endpoint: API endpoint (/receive-message)
+    :param message_data: Message payload (dict)
+    """
+    try:
+        url = f"http://{peer_ip}:{peer_port}{endpoint}"
+        json_data = json.dumps(message_data).encode('utf-8')
+        req = urllib.request.Request(
+            url,
+            data=json_data,
+            headers={'Content-Type': 'application/json'},
+            method='POST'
+        )
+        loop = asyncio.get_event_loop()
+        # Run blocking operation in thread pool
+        def _send():
+            try:
+                response = urllib.request.urlopen(req, timeout=5)
+                return response.read().decode('utf-8')
+            except urllib.error.URLError as e:
+                print(f"[P2P] Failed to send to {peer_ip}:{peer_port} - {e}")
+                return None
+        
+        result = await loop.run_in_executor(None, _send)
+        if result:
+            print(f"[P2P] Message sent to {peer_ip}:{peer_port}: {result[:50]}...")
+    except Exception as e:
+        print(f"[P2P] Error sending message to {peer_ip}:{peer_port}: {e}")
+
+@app.route('/receive-message', methods=['POST'])
+def receive_message(headers=None, body=""):
+    """
+    Endpoint for peers to receive direct messages (P2P).
+    """
+    try:
+        msg_info = json.loads(body)
+        chat_messages.append(msg_info)
+        print(f"[P2P] Received message from peer: {msg_info}")
+        return _json_tuple({
+            "status": "received",
+            "message_id": len(chat_messages),
+            "total_messages": len(chat_messages)
+        })
+    except Exception as e:
+        return _json_tuple({"error": str(e)}, 400)
 
 @app.route('/login', methods=['POST'])
 def login(headers=None, body=""):
@@ -181,20 +236,99 @@ def connect_peer(headers, body):
         return _json_tuple({"error": "Invalid payload"}, 400)
 
 @app.route('/broadcast-peer', methods=['POST'])
-def broadcast_peer(headers, body):
+async def broadcast_peer(headers, body):
+    """
+    Broadcast message to all active peers (P2P messaging).
+    Sends HTTP POST requests to each peer's /receive-message endpoint.
+    """
     try:
         msg_info = json.loads(body)
-        chat_messages.append(msg_info)
-        return _json_tuple({"status": "broadcasted", "messages": chat_messages})
-    except Exception:
-        return _json_tuple({"error": "Invalid payload"}, 400)
+        sender = msg_info.get('sender', 'anonymous')
+        content = msg_info.get('content', '')
+        
+        # Store locally
+        message_record = {
+            "sender": sender,
+            "content": content,
+            "type": "broadcast",
+            "timestamp": len(chat_messages)
+        }
+        chat_messages.append(message_record)
+        
+        print(f"[P2P] Broadcasting from {sender}: {content}")
+        
+        # Send to all active peers asynchronously
+        tasks = []
+        for peer in active_peers:
+            if peer.get('ip') and peer.get('port'):
+                task = send_to_peer(
+                    peer['ip'], 
+                    peer['port'],
+                    '/receive-message',
+                    message_record
+                )
+                tasks.append(task)
+        
+        # Execute all sends concurrently
+        if tasks:
+            await asyncio.gather(*tasks, return_exceptions=True)
+        
+        return _json_tuple({
+            "status": "broadcasted",
+            "peers_notified": len(active_peers),
+            "message": message_record,
+            "messages": chat_messages
+        })
+    except Exception as e:
+        return _json_tuple({"error": str(e)}, 400)
 
 @app.route('/send-peer', methods=['POST'])
-def send_peer(headers, body):
+async def send_peer(headers, body):
+    """
+    Send direct message to a specific peer (P2P messaging).
+    Sends HTTP POST request to target peer's /receive-message endpoint.
+    """
     try:
         msg_info = json.loads(body)
-        chat_messages.append(msg_info)
-        return _json_tuple({"status": "message_sent", "message": msg_info})
-    except Exception:
-        return _json_tuple({"error": "Invalid payload"}, 400)
+        sender = msg_info.get('sender', 'anonymous')
+        target_peer_id = msg_info.get('target_peer_id')
+        content = msg_info.get('content', '')
+        
+        # Find target peer
+        target_peer = next(
+            (p for p in active_peers if p.get('peer_id') == target_peer_id),
+            None
+        )
+        
+        if not target_peer:
+            return _json_tuple({"error": "target peer not found"}, 404)
+        
+        # Store locally
+        message_record = {
+            "sender": sender,
+            "target_peer_id": target_peer_id,
+            "content": content,
+            "type": "direct",
+            "timestamp": len(chat_messages)
+        }
+        chat_messages.append(message_record)
+        
+        print(f"[P2P] Direct message from {sender} to {target_peer_id}: {content}")
+        
+        # Send to target peer
+        if target_peer.get('ip') and target_peer.get('port'):
+            await send_to_peer(
+                target_peer['ip'],
+                target_peer['port'],
+                '/receive-message',
+                message_record
+            )
+        
+        return _json_tuple({
+            "status": "message_sent",
+            "target": target_peer_id,
+            "message": message_record
+        })
+    except Exception as e:
+        return _json_tuple({"error": str(e)}, 400)
 
