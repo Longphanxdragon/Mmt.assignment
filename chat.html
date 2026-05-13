@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AsynapRous P2P Chat</title>
+  <style>
+    :root {
+      --bg1: #0f172a;
+      --bg2: #111827;
+      --card: rgba(255,255,255,0.96);
+      --border: rgba(148,163,184,0.24);
+      --text: #0f172a;
+      --muted: #64748b;
+      --primary: #4f46e5;
+      --accent: #06b6d4;
+      --sent: #4f46e5;
+      --received: #e0f2fe;
+      --system: #f1f5f9;
+      --ok: #16a34a;
+      --danger: #dc2626;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(79,70,229,0.22), transparent 35%),
+        radial-gradient(circle at top right, rgba(6,182,212,0.18), transparent 30%),
+        linear-gradient(135deg, var(--bg1), var(--bg2));
+      color: var(--text);
+      padding: 16px;
+    }
+
+    .shell {
+      max-width: 1340px;
+      margin: 0 auto;
+      min-height: calc(100vh - 32px);
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 16px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.24);
+      overflow: hidden;
+      backdrop-filter: blur(12px);
+    }
+
+    .sidebar {
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .brand {
+      font-size: 1.45rem;
+      font-weight: 900;
+    }
+
+    .sub {
+      color: var(--muted);
+      line-height: 1.5;
+      font-size: 0.95rem;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    label {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      font-weight: 800;
+    }
+
+    input, textarea, button {
+      font: inherit;
+    }
+
+    input, textarea {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px 14px;
+      outline: none;
+      background: #fff;
+      transition: border-color .15s ease, box-shadow .15s ease;
+    }
+
+    input:focus, textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.14);
+    }
+
+    button {
+      border: 0;
+      border-radius: 14px;
+      padding: 12px 14px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: white;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform .12s ease, opacity .12s ease;
+    }
+
+    button:hover { transform: translateY(-1px); }
+    button:disabled { opacity: .55; cursor: not-allowed; transform: none; }
+
+    .status {
+      border-radius: 14px;
+      padding: 10px 12px;
+      font-size: 0.92rem;
+      background: #eff6ff;
+      color: #1d4ed8;
+      border: 1px solid #bfdbfe;
+    }
+    .status.ok { background: #ecfdf5; color: #065f46; border-color: #a7f3d0; }
+    .status.error { background: #fef2f2; color: #991b1b; border-color: #fecaca; }
+
+    .peers {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 280px;
+      overflow: auto;
+      padding-right: 2px;
+    }
+
+    .peer {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: white;
+      padding: 10px 12px;
+      cursor: pointer;
+      transition: border-color .12s ease, transform .12s ease, background .12s ease;
+    }
+
+    .peer:hover { border-color: var(--primary); transform: translateY(-1px); }
+    .peer.active { background: #eef2ff; border-color: var(--primary); }
+    .peer .name { font-weight: 800; }
+    .peer .meta { margin-top: 2px; color: var(--muted); font-size: 0.82rem; }
+
+    .main {
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      min-height: 0;
+    }
+
+    .main-top {
+      padding: 18px 20px 0 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .title { font-size: 1.2rem; font-weight: 900; }
+    .tiny { color: var(--muted); font-size: 0.9rem; margin-top: 3px; }
+
+    .messages {
+      margin: 16px 20px;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: #fff;
+      overflow: auto;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-height: 0;
+    }
+
+    .msg {
+      max-width: 76%;
+      padding: 10px 12px;
+      border-radius: 16px;
+      line-height: 1.45;
+      word-break: break-word;
+    }
+
+    .msg.sent { align-self: flex-end; background: var(--sent); color: white; border-bottom-right-radius: 4px; }
+    .msg.received { align-self: flex-start; background: var(--received); color: #0f172a; border-bottom-left-radius: 4px; }
+    .msg.system { align-self: center; background: var(--system); color: var(--muted); max-width: 100%; font-size: 0.9rem; }
+    .msg.error { align-self: center; background: #fef2f2; color: #991b1b; }
+
+    .composer {
+      padding: 0 20px 20px 20px;
+      display: flex;
+      gap: 10px;
+      align-items: flex-end;
+    }
+
+    textarea { min-height: 54px; max-height: 140px; resize: vertical; }
+    .composer button { min-width: 120px; height: 54px; }
+
+    @media (max-width: 980px) {
+      .shell { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="card sidebar">
+      <div>
+        <div class="brand">P2P Chat Demo</div>
+        <div class="sub">Một trang này chứng minh: login/auth, tracker peer list, gửi tin HTTP giữa peer, và non-blocking qua nhiều request song song.</div>
+      </div>
+
+      <div class="field">
+        <label>Open quick peers</label>
+        <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;">
+          <button type="button" onclick="openPeerPage('alice', '9002')">Alice</button>
+          <button type="button" onclick="openPeerPage('bob', '9003')">Bob</button>
+          <button type="button" onclick="openPeerPage('charlie', '9004')">Charlie</button>
+          <button type="button" onclick="openPeerPage('dave', '9005')">Dave</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Tracker URL</label>
+        <input id="trackerUrl" type="text" value="127.0.0.1:9001">
+      </div>
+
+      <div class="field">
+        <label>Peer server URL</label>
+        <input id="peerUrl" type="text" placeholder="127.0.0.1:9002">
+      </div>
+
+      <div class="field">
+        <label>Tên peer</label>
+        <input id="nameInput" type="text" placeholder="alice" maxlength="30">
+      </div>
+
+      <div class="field">
+        <label>Username / password</label>
+        <input id="userInput" type="text" placeholder="student" value="student">
+        <input id="passInput" type="password" placeholder="pass123" value="pass123">
+      </div>
+
+      <button id="joinBtn">Login + Register</button>
+
+      <div id="statusBox" class="status">Chưa đăng nhập</div>
+
+      <div>
+        <label>Peer online</label>
+        <div id="peersList" class="peers"></div>
+      </div>
+    </aside>
+
+    <main class="card main">
+      <div class="main-top">
+        <div>
+          <div class="title" id="chatTitle">Chưa chọn peer</div>
+          <div class="tiny" id="chatHint">Đăng nhập, đăng ký tracker rồi chọn peer để chat</div>
+        </div>
+        <button id="refreshBtn" style="min-width: 150px;">Làm mới danh sách</button>
+      </div>
+
+      <div id="messages" class="messages">
+        <div class="msg system">Nhập peer/server rồi bấm Login + Register.</div>
+      </div>
+
+      <div class="composer">
+        <textarea id="messageInput" placeholder="Nhập tin nhắn..." disabled></textarea>
+        <button id="sendBtn" disabled>Gửi</button>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const API_TIMEOUT = 15000;
+    const params = new URLSearchParams(location.search);
+    const defaultName = params.get('name') || 'alice';
+    const defaultPeerPort = params.get('peerport') || '9002';
+    const defaultTracker = params.get('tracker') || '127.0.0.1:9001';
+    const defaultPeerUrl = params.get('peer') || `127.0.0.1:${defaultPeerPort}`;
+
+    const nameInput = document.getElementById('nameInput');
+    const trackerUrlInput = document.getElementById('trackerUrl');
+    const peerUrlInput = document.getElementById('peerUrl');
+    const userInput = document.getElementById('userInput');
+    const passInput = document.getElementById('passInput');
+    const joinBtn = document.getElementById('joinBtn');
+    const refreshBtn = document.getElementById('refreshBtn');
+    const sendBtn = document.getElementById('sendBtn');
+    const statusBox = document.getElementById('statusBox');
+    const peersList = document.getElementById('peersList');
+    const messages = document.getElementById('messages');
+    const messageInput = document.getElementById('messageInput');
+    const chatTitle = document.getElementById('chatTitle');
+    const chatHint = document.getElementById('chatHint');
+
+    let myName = defaultName;
+    let myPeerId = defaultName;
+    let myPeerUrl = defaultPeerUrl;
+    let trackerUrl = defaultTracker;
+    let currentPeer = '';
+    let loginOk = false;
+    let pollTimer = null;
+    let heartbeatTimer = null;
+    let selfRegisterTimer = null;
+    const seenIds = new Set();
+
+    function now() { return Date.now(); }
+
+    function setStatus(text, kind = '') {
+      statusBox.textContent = text;
+      statusBox.className = kind ? `status ${kind}` : 'status';
+    }
+
+    function apiUrl(base, path) {
+      return `http://${base}${path}`;
+    }
+
+    async function apiCall(base, path, options = {}) {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), API_TIMEOUT);
+      const fetchOptions = { ...options, signal: controller.signal };
+      try {
+        const fullUrl = apiUrl(base, path);
+        console.log('[apiCall] GET', fullUrl, fetchOptions);
+        const resp = await fetch(fullUrl, fetchOptions);
+        const text = await resp.text();
+        console.log('[apiCall] Response', resp.status, text.substring(0, 100));
+        let data = null;
+        try { data = text ? JSON.parse(text) : null; } catch (e) { data = text; }
+        return { resp, data };
+      } catch (err) {
+        console.error('[apiCall] Error:', err.message, err.name);
+        throw err;
+      } finally {
+        clearTimeout(timeout);
+      }
+    }
+
+    async function loginPeer() {
+      const user = userInput.value.trim();
+      const pass = passInput.value.trim();
+      myName = nameInput.value.trim();
+      myPeerId = myName;
+      trackerUrl = trackerUrlInput.value.trim();
+      myPeerUrl = peerUrlInput.value.trim();
+
+      console.log('[loginPeer] Peer URL:', myPeerUrl, 'Tracker:', trackerUrl);
+
+      if (!myName || !trackerUrl || !myPeerUrl) {
+        setStatus('Thiếu tên peer hoặc URL', 'error');
+        return;
+      }
+
+      joinBtn.disabled = true;
+      setStatus('Đang login...', '');
+
+      try {
+        const { resp, data } = await apiCall(myPeerUrl, '/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ user, pass }),
+        });
+
+        if (!resp.ok) {
+          throw new Error(data && data.error ? data.error : `HTTP ${resp.status}`);
+        }
+
+        loginOk = true;
+
+        // Register with tracker after login succeeds.
+        const registerResult = await apiCall(trackerUrl, '/submit-info', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            peer_id: myPeerId,
+            ip: myPeerUrl.split(':')[0],
+            port: parseInt(myPeerUrl.split(':')[1], 10),
+          }),
+        });
+
+        if (!registerResult.resp.ok) {
+          throw new Error(registerResult.data && registerResult.data.error ? registerResult.data.error : `tracker HTTP ${registerResult.resp.status}`);
+        }
+
+        setStatus(`Đã login + register: ${myName}`, 'ok');
+        chatTitle.textContent = `Peer ${myName}`;
+        chatHint.textContent = `Tracker: ${trackerUrl} | Peer: ${myPeerUrl}`;
+        messageInput.disabled = false;
+        sendBtn.disabled = false;
+        renderPeers();
+        addSystemMessage('Login OK. Server đã chấp nhận credentials JSON.');
+        refreshPeers();
+        startTimers();
+      } catch (err) {
+        joinBtn.disabled = false;
+        setStatus(`Login fail: ${err.message}`, 'error');
+        addErrorMessage(`Login fail: ${err.message}`);
+      }
+    }
+
+    function startTimers() {
+      if (!pollTimer) {
+        pollTimer = setInterval(() => {
+          refreshPeers();
+          pollMessages();
+        }, 1500);
+      }
+      if (!heartbeatTimer) {
+        heartbeatTimer = setInterval(() => {
+          if (loginOk) refreshPeers();
+        }, 5000);
+      }
+      if (!selfRegisterTimer) {
+        selfRegisterTimer = setInterval(() => {
+          if (loginOk) registerSelf();
+        }, 7000);
+      }
+    }
+
+    async function registerSelf() {
+      try {
+        await apiCall(trackerUrl, '/submit-info', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            peer_id: myPeerId,
+            ip: myPeerUrl.split(':')[0],
+            port: parseInt(myPeerUrl.split(':')[1], 10),
+          }),
+        });
+      } catch (e) {
+        // ignore heartbeat failures
+      }
+    }
+
+    async function refreshPeers() {
+      try {
+        const { resp, data } = await apiCall(trackerUrl, '/get-list', { method: 'GET' });
+        if (!resp.ok) throw new Error(data && data.error ? data.error : `HTTP ${resp.status}`);
+        const peers = (data && data.active_peers) ? data.active_peers : [];
+        renderPeers(peers);
+      } catch (err) {
+        setStatus(`Refresh failed: ${err.message}`, 'error');
+      }
+    }
+
+    function renderPeers(peers = null) {
+      const currentList = peers || [];
+      const filtered = currentList.filter(p => p.peer_id !== myPeerId);
+      if (filtered.length === 0) {
+        peersList.innerHTML = '<div class="peer"><div class="name">Chưa có peer</div><div class="meta">Mở thêm trang khác hoặc kiểm tra tracker</div></div>';
+        return;
+      }
+
+      peersList.innerHTML = filtered.map(p => `
+        <div class="peer ${p.peer_id === currentPeer ? 'active' : ''}" data-peer-id="${p.peer_id}" data-ip="${p.ip}" data-port="${p.port}">
+          <div class="name">${p.peer_id}</div>
+          <div class="meta">${p.ip}:${p.port}</div>
+        </div>
+      `).join('');
+
+      document.querySelectorAll('.peer').forEach(item => {
+        item.onclick = () => {
+          const peerId = item.getAttribute('data-peer-id');
+          currentPeer = peerId;
+          document.querySelectorAll('.peer').forEach(p => p.classList.remove('active'));
+          item.classList.add('active');
+          const peerName = peerId;
+          chatTitle.textContent = `Chat với ${peerName}`;
+          chatHint.textContent = `Gửi tin trực tiếp tới ${peerName}`;
+          messageInput.disabled = false;
+          sendBtn.disabled = false;
+          messages.innerHTML = '';
+          addSystemMessage(`Đã chọn peer ${peerName}`);
+        };
+      });
+    }
+
+    async function sendMessage() {
+      const text = messageInput.value.trim();
+      if (!text) return;
+      if (!currentPeer) {
+        setStatus('Chọn peer trước khi gửi', 'error');
+        return;
+      }
+
+      const peersResult = await apiCall(trackerUrl, '/get-list', { method: 'GET' });
+      const peers = (peersResult.data && peersResult.data.active_peers) ? peersResult.data.active_peers : [];
+      const target = peers.find(p => p.peer_id === currentPeer);
+      if (!target) {
+        setStatus('Không tìm thấy peer đích trong tracker', 'error');
+        return;
+      }
+
+      try {
+        const { resp, data } = await apiCall(myPeerUrl, '/send-peer', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            sender: myPeerId,
+            target_peer_id: target.peer_id,
+            target_ip: target.ip,
+            target_port: target.port,
+            content: text,
+          }),
+        });
+
+        if (!resp.ok) throw new Error(data && data.error ? data.error : `HTTP ${resp.status}`);
+
+        addMessage(text, 'sent', `${myPeerId} → ${target.peer_id}`);
+        messageInput.value = '';
+        setStatus(`Đã gửi tới ${target.peer_id}`, 'ok');
+        pollMessages();
+      } catch (err) {
+        setStatus(`Send fail: ${err.message}`, 'error');
+        addErrorMessage(`Send fail: ${err.message}`);
+      }
+    }
+
+    async function pollMessages() {
+      if (!loginOk) return;
+      try {
+        const { resp, data } = await apiCall(myPeerUrl, '/get-messages', { method: 'GET' });
+        if (!resp.ok) return;
+        const list = (data && data.messages) ? data.messages : [];
+        const relevant = list.filter(m => {
+          if (m.type === 'broadcast') return true;
+          return (m.sender === currentPeer && m.target_peer_id === myPeerId) ||
+                 (m.sender === myPeerId && m.target_peer_id === currentPeer);
+        });
+
+        const box = document.getElementById('messages');
+        const visibleCount = box.querySelectorAll('.msg:not(.system):not(.error)').length;
+        if (relevant.length > visibleCount) {
+          box.innerHTML = '';
+          for (const msg of relevant) {
+            if (msg.type === 'broadcast') {
+              addMessage(msg.content || '', msg.sender === myPeerId ? 'sent' : 'received', `${msg.sender} (broadcast)`);
+            } else if (msg.sender === myPeerId) {
+              addMessage(msg.content || '', 'sent', `${myPeerId} → ${msg.target_peer_id}`);
+            } else {
+              addMessage(msg.content || '', 'received', `${msg.sender} → ${myPeerId}`);
+            }
+          }
+        }
+      } catch (err) {
+        // ignore polling hiccups
+      }
+    }
+
+    function addMessage(text, kind, meta = '') {
+      const div = document.createElement('div');
+      div.className = `msg ${kind}`;
+      div.innerHTML = meta ? `<strong>${meta}</strong><br>${escapeHtml(text)}` : escapeHtml(text);
+      messages.appendChild(div);
+      messages.scrollTop = messages.scrollHeight;
+    }
+
+    function addSystemMessage(text) { addMessage(text, 'system'); }
+    function addErrorMessage(text) { addMessage(text, 'error'); }
+
+    function escapeHtml(text) {
+      return String(text)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    function openPeerPage(name, peerPort) {
+      const url = `${location.origin}${location.pathname}?name=${encodeURIComponent(name)}&peerport=${encodeURIComponent(peerPort)}&tracker=${encodeURIComponent(trackerUrlInput.value.trim())}`;
+      window.open(url, '_blank', 'noopener');
+    }
+
+    joinBtn.addEventListener('click', loginPeer);
+    refreshBtn.addEventListener('click', refreshPeers);
+    sendBtn.addEventListener('click', sendMessage);
+    messageInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+
+    window.addEventListener('beforeunload', () => {
+      if (pollTimer) clearInterval(pollTimer);
+      if (heartbeatTimer) clearInterval(heartbeatTimer);
+      if (selfRegisterTimer) clearInterval(selfRegisterTimer);
+    });
+
+    // Prefill from query params.
+    nameInput.value = defaultName;
+    trackerUrlInput.value = defaultTracker;
+    peerUrlInput.value = defaultPeerUrl;
+    addSystemMessage('Mở 4 trang với 4 peer khác nhau. Login xong thì đăng ký tracker và chat qua backend thật.');
+  </script>
+</body>
+</html>

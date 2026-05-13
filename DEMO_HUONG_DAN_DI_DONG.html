@@ -1,0 +1,1463 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Kịch bản demo mạng máy tính</title>
+  <style>
+    :root {
+      --bg: #f3f4f6;
+      --card-bg: #ffffff;
+      --text: #1f2937;
+      --primary: #2563eb;
+      --success: #16a34a;
+      --danger: #dc2626;
+      --highlight-bg: #fffbeb;
+      --highlight-border: #f59e0b;
+      --code-bg: #1e293b;
+      --code-text: #e2e8f0;
+      --label-color: #64748b;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      margin: 0;
+      padding: 10px;
+      font-size: 16px;
+    }
+
+    h1 {
+      text-align: center;
+      color: var(--primary);
+      font-size: 1.5rem;
+      margin-bottom: 5px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: var(--label-color);
+      font-size: 0.95rem;
+      margin-bottom: 20px;
+    }
+
+    .step-card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      border-top: 4px solid var(--primary);
+    }
+
+    .step-title {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: var(--primary);
+      margin-top: 0;
+      margin-bottom: 15px;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 5px;
+    }
+
+    .row {
+      margin-bottom: 10px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .label {
+      font-weight: bold;
+      color: var(--label-color);
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .value {
+      font-size: 1rem;
+    }
+
+    .cmd-box {
+      background: var(--code-bg);
+      color: var(--code-text);
+      padding: 10px;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 0.92rem;
+      overflow-x: auto;
+      margin-top: 5px;
+      border-left: 4px solid var(--success);
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .highlight-box {
+      background-color: var(--highlight-bg);
+      border: 2px solid var(--highlight-border);
+      border-radius: 8px;
+      padding: 12px;
+      margin-top: 15px;
+    }
+
+    .highlight-title {
+      color: #b45309;
+      font-weight: bold;
+      font-size: 1.05rem;
+      margin-bottom: 5px;
+    }
+
+    .highlight-text {
+      color: #92400e;
+      font-size: 0.95rem;
+      font-weight: 500;
+    }
+
+    .highlight-text b {
+      color: #78350f;
+      background-color: #fde68a;
+      padding: 0 4px;
+      border-radius: 3px;
+    }
+
+    .warning-box {
+      background-color: #fee2e2;
+      border: 2px solid #fca5a5;
+      border-radius: 8px;
+      padding: 12px;
+      margin-top: 15px;
+    }
+
+    .warning-title {
+      color: #991b1b;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .warning-text {
+      color: #7f1d1d;
+      font-size: 0.95rem;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🎬 Kịch bản DEMO Bảo Vệ</h1>
+  <div class="subtitle">Vuốt để đọc. Mỗi bước có lệnh, cách chạy, và cách đọc kết quả.</div>
+
+  <!-- PHẦN 1: Chuẩn bị -->
+  <div class="step-card">
+    <h2 class="step-title">Bước 0️⃣: Chuẩn bị thư mục</h2>
+    <div class="row">
+      <span class="label">Lệnh:</span>
+      <div class="cmd-box">cd /workspaces/Mmt.assignment</div>
+    </div>
+    <div class="row">
+      <span class="label">Chạy ở:</span>
+      <span class="value">Terminal 1</span>
+    </div>
+    <div class="row">
+      <span class="label">Giải thích:</span>
+      <span class="value">Di chuyển vào thư mục dự án để gọi các script.</span>
+    </div>
+  </div>
+
+  <!-- PHẦN 2: Scenario A - Client-Server đơn giản -->
+  <div class="step-card">
+    <h2 class="step-title">🌐 SCENARIO A: Demo Client-Server (5 phút)</h2>
+    <div class="highlight-box">
+      <div class="highlight-title">✅ Dùng cho: Chứng minh proxy + backend hoạt động</div>
+      <div class="highlight-text">Thích hợp khi cần demo nhanh proxy forwarding và HTTP non-blocking cơ bản.</div>
+    </div>
+
+    <div class="row" style="margin-top: 15px;">
+      <span class="label">Bước 1: Khởi động hệ thống</span>
+      <div class="cmd-box">./run-dev.sh</div>
+    </div>
+    <div class="row">
+      <span class="label">Chạy ở:</span>
+      <span class="value">Terminal 1</span>
+    </div>
+    <div class="row">
+      <span class="label">Kết quả mong đợi:</span>
+      <span class="value">Thấy dòng "Starting sampleapp...", "Starting proxy...", "Services started"</span>
+    </div>
+
+    <div class="row">
+      <span class="label">Bước 2: Test GET danh sách peer</span>
+      <div class="cmd-box">curl -i http://127.0.0.1:8080/getlist -H "Host: localhost:8080"</div>
+    </div>
+    <div class="row">
+      <span class="label">Chạy ở:</span>
+      <span class="value">Terminal 2 (giữ Terminal 1 chạy)</span>
+    </div>
+    <div class="row">
+      <span class="label">Kết quả:</span>
+      <span class="value"><b>HTTP/1.1 200 OK</b> + body: <b>{"active_peers": []}</b></span>
+    </div>
+
+    <div class="row">
+      <span class="label">Bước 3: Test POST echo</span>
+      <div class="cmd-box">curl -i -X POST http://127.0.0.1:8080/echo \
+  -H "Host: localhost:8080" \
+  -H "Content-Type: application/json" \
+  -d '{"text":"demo"}'</div>
+    </div>
+    <div class="row">
+      <span class="label">Kết quả:</span>
+      <span class="value"><b>HTTP/1.1 200 OK</b> + body: <b>{"received": {"text": "demo"}}</b></span>
+    </div>
+
+    <div class="row">
+      <span class="label">Bước 4: Dừng dịch vụ</span>
+      <div class="cmd-box">./stop-dev.sh</div>
+    </div>
+    <div class="row">
+      <span class="label">Kết quả:</span>
+      <span class="value">Nhìn thấy "Killed PID ... Stopped dev services"</span>
+    </div>
+
+    <div class="highlight-box">
+      <div class="highlight-title">💬 Khi nói với thầy:</div>
+      <div class="highlight-text">"Thưa thầy, HTTP proxy (8080) nhận request và forward sang backend (9001). Response trả về qua proxy, chứng minh non-blocking forward hoạt động. GET /getlist trả JSON, POST /echo echo lại payload - cả hai đều là HTTP request-response chuẩn."</div>
+    </div>
+  </div>
+
+  <!-- PHẦN 3: Scenario B - P2P Chat Web UI -->
+  <div class="step-card">
+    <h2 class="step-title">💻 SCENARIO B: Demo P2P Chat Web UI (10-15 phút)</h2>
+    <div class="highlight-box">
+      <div class="highlight-title">✅ Dùng cho: Chứng minh chat Peer-to-Peer hoàn chỉnh</div>
+      <div class="highlight-text">Thích hợp khi cần demo giao diện chat thực tế, Peer kết nối, gửi/nhận tin nhắn realtime.</div>
+    </div>
+
+    <div class="row" style="margin-top: 15px;">
+      <span class="label">Chuẩn bị: Dừng dịch vụ cũ (nếu còn chạy)</span>
+      <div class="cmd-box">./stop-dev.sh</div>
+    </div>
+
+    <div class="row">
+      <span class="label">Terminal 1: Chạy Peer 1 (Alice) ở port 9001</span>
+      <div class="cmd-box">source .venv/bin/activate
+python3 CO3094-asynaprous/start_sampleapp.py --server-port 9001</div>
+    </div>
+    <div class="row">
+      <span class="label">Kết quả:</span>
+      <span class="value">Thấy "Starting sampleapp on port 9001"</span>
+    </div>
+
+    <div class="row">
+      <span class="label">Terminal 2: Chạy Peer 2 (Bob) ở port 9002</span>
+      <div class="cmd-box">source .venv/bin/activate
+python3 CO3094-asynaprous/start_sampleapp.py --server-port 9002</div>
+    </div>
+    <div class="row">
+      <span class="label">Kết quả:</span>
+      <span class="value">Thấy "Starting sampleapp on port 9002"</span>
+    </div>
+
+    <div class="row">
+      <span class="label">Terminal 3 (hoặc Browser): Mở file chat UI</span>
+      <div class="cmd-box">file:///workspaces/Mmt.assignment/chat.html</div>
+    </div>
+    <div class="row">
+      <span class="label">Hoặc dùng Python server:</span>
+      <div class="cmd-box">cd /workspaces/Mmt.assignment
+python3 -m http.server 8000
+# Rồi mở browser: http://127.0.0.1:8000/chat.html</div>
+    </div>
+
+    <div class="row">
+      <span class="label">Bước 1: Login Peer 1 (Alice)</span>
+      <span class="value">Trong giao diện chat.html:</span>
+    </div>
+    <div class="row">
+      <div style="margin-left: 20px; font-size: 0.9rem;">
+        • <b>Server Backend:</b> nhập <b>127.0.0.1:9001</b><br>
+        • <b>Tên người dùng:</b> nhập <b>alice</b><br>
+        • Bấm <b>Đăng nhập</b>
+      </div>
+    </div>
+    <div class="row">
+      <span class="label">Kết quả:</span>
+      <span class="value">Giao diện chat xuất hiện, "alice" thành công đăng ký</span>
+    </div>
+
+    <div class="row">
+      <span class="label">Bước 2: Mở tab browser 2, Login Peer 2 (Bob)</span>
+      <span class="value">Mở tab mới → F5 chat.html → Nhập:</span>
+    </div>
+    <div class="row">
+      <div style="margin-left: 20px; font-size: 0.9rem;">
+        • <b>Server Backend:</b> nhập <b>127.0.0.1:9002</b><br>
+        • <b>Tên người dùng:</b> nhập <b>bob</b><br>
+        • Bấm <b>Đăng nhập</b>
+      </div>
+    </div>
+
+    <div class="row">
+      <span class="label">Bước 3: Alice (Tab 1) gửi tin nhắn cho Bob</span>
+      <span class="value">Ở Tab 1 (alice):</span>
+    </div>
+    <div class="row">
+      <div style="margin-left: 20px; font-size: 0.9rem;">
+        • Bấm <b>🔄 Làm mới</b> để thấy <b>bob</b> trong danh sách peers<br>
+        • Bấm vào <b>bob</b> để chọn<br>
+        • Nhập tin nhắn: "Xin chào Bob!"<br>
+        • Bấm <b>📤</b> để gửi
+      </div>
+    </div>
+    <div class="row">
+      <span class="label">Kết quả:</span>
+      <span class="value">Alice thấy tin nhắn xuất hiện ở chat box (status: "✅ Gửi tới bob")</span>
+    </div>
+
+    <div class="row">
+      <span class="label">Bước 4: Bob (Tab 2) nhận tin nhắn</span>
+      <span class="value">Ở Tab 2 (bob):</span>
+    </div>
+    <div class="row">
+      <div style="margin-left: 20px; font-size: 0.9rem;">
+        • Bấm <b>🔄 Làm mới</b> để thấy <b>alice</b> trong danh sách<br>
+        • Bấm vào <b>alice</b><br>
+        • <b>Tin nhắn từ alice sẽ xuất hiện REALTIME trong chat box</b>
+      </div>
+    </div>
+
+    <div class="row">
+      <span class="label">Bước 5: Bob reply tin nhắn</span>
+      <span class="value">Nhập "Chào Alice!" → Gửi → Alice sẽ thấy tin ngay</span>
+    </div>
+
+    <div class="highlight-box">
+      <div class="highlight-title">💬 Khi nói với thầy:</div>
+      <div class="highlight-text">"Thưa thầy, đây là Peer-to-Peer Chat. <b>Alice (port 9001)</b> và <b>Bob (port 9002)</b> là 2 peer độc lập. Khi Alice gửi tin tới Bob, backend của Alice sẽ gọi HTTP POST đến <b>endpoint /receive-message</b> của Bob (port 9002). Tất cả là <b>async non-blocking</b>, nên Alice không phải chờ Bob trả lời - gửi xong là 200 OK ngay. Tin nhắn được lưu trong memory của mỗi peer, và UI polling /get-messages mỗi 1 giây để update realtime."</div>
+    </div>
+
+    <div class="warning-box">
+      <div class="warning-title">⚠️ Lưu ý:</div>
+      <div class="warning-text">• Nếu tin nhắn chậm xuất hiện, bấm <b>🔄 Làm mới</b> để refresh danh sách peers<br>• Nếu không thấy peer, check Terminal 1 & 2 có lỗi không (xem output)<br>• Từng peer chỉ nhìn thấy tin nhắn giữa mình và peer khác, không nhìn toàn bộ chat history</div>
+    </div>
+  </div>
+
+  <!-- PHẦN 4: Scenario C - CLI (curl) test -->
+  <div class="step-card">
+    <h2 class="step-title">🖥️ SCENARIO C: Demo P2P qua Command Line (curl)</h2>
+    <div class="highlight-box">
+      <div class="highlight-title">✅ Dùng cho: Chứng minh API endpoints, request-response trực tiếp</div>
+      <div class="highlight-text">Thích hợp khi muốn chứng minh API hoạt động, không cần UI.</div>
+    </div>
+
+    <div class="row" style="margin-top: 15px;">
+      <span class="label">Giả sử 2 peer đã chạy ở port 9001 & 9002, Terminal 3:</span>
+      <div class="cmd-box"># Peer 1 đăng ký
+curl -X POST http://127.0.0.1:9001/submit-info \
+  -H "Content-Type: application/json" \
+  -d '{"peer_id":"alice","ip":"127.0.0.1","port":9001}'
+
+# Peer 2 đăng ký
+curl -X POST http://127.0.0.1:9002/submit-info \
+  -H "Content-Type: application/json" \
+  -d '{"peer_id":"bob","ip":"127.0.0.1","port":9002}'</div>
+    </div>
+    <div class="row">
+      <span class="label">Kết quả:</span>
+      <span class="value"><b>{"status": "success", "active_peers": [...]}</b> - 2 peers đã đăng ký</span>
+    </div>
+
+    <div class="row">
+      <span class="label">Lấy danh sách peers</span>
+      <div class="cmd-box">curl http://127.0.0.1:9001/get-list</div>
+    </div>
+    <div class="row">
+      <span class="label">Kết quả:</span>
+      <span class="value"><b>{"active_peers": [{"peer_id":"alice",...}, {"peer_id":"bob",...}]}</b></span>
+    </div>
+
+    <div class="row">
+      <span class="label">Alice gửi tin cho Bob</span>
+      <div class="cmd-box">curl -X POST http://127.0.0.1:9001/send-peer \
+  -H "Content-Type: application/json" \
+  -d '{"sender":"alice","target_peer_id":"bob","content":"Hello Bob!"}'</div>
+    </div>
+    <div class="row">
+      <span class="label">Kết quả:</span>
+      <span class="value"><b>{"status": "message_sent", "target": "bob", ...}</b></span>
+    </div>
+
+    <div class="row">
+      <span class="label">Xem tin nhắn lưu ở Bob</span>
+      <div class="cmd-box">curl http://127.0.0.1:9002/get-messages</div>
+    </div>
+    <div class="row">
+      <span class="label">Kết quả:</span>
+      <span class="value"><b>{"messages": [{sender:"alice", target_peer_id:"bob", content:"Hello Bob!", ...}], ...}</b></span>
+    </div>
+
+    <div class="highlight-box">
+      <div class="highlight-title">💬 Khi nói với thầy:</div>
+      <div class="highlight-text">"HTTP API của peer cho phép đăng ký (/submit-info), liệt kê (/get-list), gửi tin (/send-peer), và lấy tin nhắn (/get-messages). Tất cả là JSON, tuân theo REST. Tin nhắn được forwarded qua HTTP POST từ sender tới receiver."</div>
+    </div>
+  </div>
+
+  <!-- PHẦN 5: Kiểm tra logs -->
+  <div class="step-card">
+    <h2 class="step-title">📋 Bước cuối: Kiểm tra Logs</h2>
+    <div class="row">
+      <span class="label">Xem log application:</span>
+      <div class="cmd-box">tail -50 logs/sampleapp.log</div>
+    </div>
+    <div class="row">
+      <span class="label">Kết quả mong đợi:</span>
+      <span class="value">Thấy dòng "[P2P] Received message from peer:", "[SampleApp] Login attempt", etc - chứng minh request đã xử lý</span>
+    </div>
+
+    <div class="row">
+      <span class="label">Xem log proxy (nếu dùng ./run-dev.sh):</span>
+      <div class="cmd-box">tail -20 logs/proxy.log</div>
+    </div>
+  </div>
+
+  <!-- PHẦN 6: Tổng kết -->
+  <div class="step-card">
+    <h2 class="step-title">📝 Tổng Kết - Những gì đã Demo</h2>
+    <div class="row">
+      <span class="label">✅ Non-blocking HTTP Server:</span>
+      <span class="value">Proxy (8080) + Backend (9001) nhận request đồng thời, không blocking</span>
+    </div>
+    <div class="row">
+      <span class="label">✅ HTTP Request-Response:</span>
+      <span class="value">GET /get-list, POST /echo, POST /send-peer, POST /submit-info — tất cả JSON</span>
+    </div>
+    <div class="row">
+      <span class="label">✅ Peer-to-Peer Chat:</span>
+      <span class="value">Alice & Bob gửi tin nhắn trực tiếp qua HTTP (không thông qua server trung tâm khác)</span>
+    </div>
+    <div class="row">
+      <span class="label">✅ Async (Non-blocking I/O):</span>
+      <span class="value">Gửi tin không chờ reply, realtime polling update UI</span>
+    </div>
+    <div class="row">
+      <span class="label">✅ Giao diện Web:</span>
+      <span class="value">Chat.html cung cấp UI đầy đủ để demo mà không cần terminal</span>
+    </div>
+
+    <div class="highlight-box">
+      <div class="highlight-title">💬 Thông điệp tóm tắt cho thầy:</div>
+      <div class="highlight-text">"Thưa thầy, hệ thống xây dựng một <b>HTTP server non-blocking</b> dùng <b>asyncio</b> để xử lý nhiều request cùng lúc. <b>Proxy</b> làm trạm forwarding, <b>Backend</b> xử lý logic. <b>Chat application</b> triển khai P2P: 2 peer độc lập gửi tin nhắn cho nhau qua HTTP POST async. Tất cả endpoint đều trả JSON, tuân chuẩn REST. Log và UI chứng minh hoạt động đúng."</div>
+    </div>
+  </div>
+
+  <!-- PHẦN 7: Cheat Sheet -->
+  <div class="step-card">
+    <h2 class="step-title">⚡ Cheat Sheet - Lệnh Nhanh</h2>
+    
+    <div class="row">
+      <span class="label">Quick Run Client-Server (Scenario A):</span>
+      <div class="cmd-box">./run-dev.sh
+# Terminal 2:
+curl -i http://127.0.0.1:8080/getlist -H "Host: localhost:8080"
+./stop-dev.sh</div>
+    </div>
+
+    <div class="row">
+      <span class="label">Quick Run P2P Chat (Scenario B):</span>
+      <div class="cmd-box"># Terminal 1:
+source .venv/bin/activate
+python3 CO3094-asynaprous/start_sampleapp.py --server-port 9001
+
+# Terminal 2:
+python3 CO3094-asynaprous/start_sampleapp.py --server-port 9002
+
+# Browser: file:///workspaces/Mmt.assignment/chat.html
+# Đăng nhập alice (9001) & bob (9002), chat realtime
+</div>
+    </div>
+
+    <div class="row">
+      <span class="label">Quick Run P2P CLI (Scenario C):</span>
+      <div class="cmd-box">curl -X POST http://127.0.0.1:9001/submit-info -H "Content-Type: application/json" -d '{"peer_id":"alice","ip":"127.0.0.1","port":9001}'
+curl -X POST http://127.0.0.1:9001/send-peer -H "Content-Type: application/json" -d '{"sender":"alice","target_peer_id":"bob","content":"Hi"}'
+curl http://127.0.0.1:9002/get-messages</div>
+    </div>
+  </div>
+
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Kịch bản demo mạng máy tính</title>
+  <style>
+    :root {
+      --bg: #f3f4f6;
+      --card-bg: #ffffff;
+      --text: #1f2937;
+      --primary: #2563eb;
+      --success: #16a34a;
+      --danger: #dc2626;
+      --highlight-bg: #fffbeb;
+      --highlight-border: #f59e0b;
+      --code-bg: #1e293b;
+      --code-text: #e2e8f0;
+      --label-color: #64748b;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      margin: 0;
+      padding: 10px;
+      font-size: 16px;
+    }
+
+    h1 {
+      text-align: center;
+      color: var(--primary);
+      font-size: 1.5rem;
+      margin-bottom: 5px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: var(--label-color);
+      font-size: 0.95rem;
+      margin-bottom: 20px;
+    }
+
+    .step-card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      border-top: 4px solid var(--primary);
+    }
+
+    .step-title {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: var(--primary);
+      margin-top: 0;
+      margin-bottom: 15px;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 5px;
+    }
+
+    .row {
+      margin-bottom: 10px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .label {
+      font-weight: bold;
+      color: var(--label-color);
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .value {
+      font-size: 1rem;
+    }
+
+    .cmd-box {
+      background: var(--code-bg);
+      color: var(--code-text);
+      padding: 10px;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 0.92rem;
+      overflow-x: auto;
+      margin-top: 5px;
+      border-left: 4px solid var(--success);
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .highlight-box {
+      background-color: var(--highlight-bg);
+      border: 2px solid var(--highlight-border);
+      border-radius: 8px;
+      padding: 12px;
+      margin-top: 15px;
+    }
+
+    .highlight-title {
+      color: #b45309;
+      font-weight: bold;
+      font-size: 1.05rem;
+      margin-bottom: 5px;
+    }
+
+    .highlight-text {
+      color: #92400e;
+      font-size: 0.95rem;
+      font-weight: 500;
+    }
+
+    .highlight-text b {
+      color: #78350f;
+      background-color: #fde68a;
+      padding: 0 4px;
+      border-radius: 3px;
+    }
+
+    .warning-box {
+      background-color: #fee2e2;
+      border: 2px solid #fca5a5;
+      border-radius: 8px;
+      padding: 12px;
+      margin-top: 15px;
+    }
+
+    .warning-title {
+      color: #991b1b;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .warning-text {
+      color: #7f1d1d;
+      font-size: 0.95rem;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Kịch bản demo bảo vệ</h1>
+  <div class="subtitle">Vuốt để đọc. Mỗi lệnh có giải thích và cách đọc kết quả ngay bên dưới.</div>
+
+  <div class="step-card">
+    <h2 class="step-title">Bước 0: Chuẩn bị</h2>
+    <div class="row">
+      <span class="label">Viết lệnh gì:</span>
+      <div class="cmd-box">cd /workspaces/Mmt.assignment</div>
+    </div>
+    <div class="row">
+      <span class="label">Ở đâu:</span>
+      <span class="value">Terminal 1</span>
+    </div>
+    <div class="row">
+      <span class="label">Giải thích:</span>
+      <span class="value">Di chuyển vào thư mục chứa mã nguồn để gọi các script thực thi.</span>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <h2 class="step-title">Bước 1: Khởi động hệ thống Proxy + Backend</h2>
+    <div class="row">
+      <span class="label">Viết lệnh gì:</span>
+      <div class="cmd-box">./run-dev.sh</div>
+    </div>
+    <div class="row">
+      <span class="label">Ở đâu:</span>
+      <span class="value">Terminal 1</span>
+    </div>
+    <div class="row">
+      <span class="label">Giải thích:</span>
+      <span class="value">Lệnh này bật đồng thời 2 tiến trình: Proxy Server ở cổng 8080 và Backend Server ở cổng 9001.</span>
+    </div>
+    <div class="row">
+      <span class="label">Cách đọc kết quả:</span>
+      <span class="value">Nhìn thấy "Starting sampleapp...", "Starting proxy...", "Services started..." là hệ thống đã chạy xong.</span>
+    </div>
+    <div class="highlight-box">
+      <div class="highlight-title">Ý nghĩa để nói với thầy:</div>
+      <div class="highlight-text">"Thưa thầy, lệnh này mở 2 socket TCP ở trạng thái <b>LISTEN</b>. <b>Proxy (8080)</b> làm trạm trung chuyển nhận request rồi forward, còn <b>Backend (9001)</b> xử lý logic. Kiến trúc này là nền cho cơ chế non-blocking."</div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <h2 class="step-title">Bước 2: Lấy danh sách peer (GET)</h2>
+    <div class="row">
+      <span class="label">Viết lệnh gì:</span>
+      <div class="cmd-box">curl -i http://127.0.0.1:8080/getlist -H "Host: localhost:8080"</div>
+    </div>
+    <div class="row">
+      <span class="label">Ở đâu:</span>
+      <span class="value">Terminal 2 hoặc 3 (để Terminal 1 tiếp tục chạy nền)</span>
+    </div>
+    <div class="row">
+      <span class="label">Cách đọc kết quả:</span>
+      <span class="value">Dòng đầu <b>HTTP/1.1 200 OK</b>. Header <b>Content-Type: application/json</b>. Body: <b>{"active_peers": []}</b>.</span>
+    </div>
+    <div class="highlight-box">
+      <div class="highlight-title">Ý nghĩa:</div>
+      <div class="highlight-text">Request qua proxy (8080) → backend (9001) xử lý → trả JSON. Đây là HTTP GET qua kiến trúc proxy.</div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <h2 class="step-title">Bước 3: Gửi echo message (POST)</h2>
+    <div class="row">
+      <span class="label">Viết lệnh gì:</span>
+      <div class="cmd-box">curl -i -X POST http://127.0.0.1:8080/echo \
+  -H "Host: localhost:8080" \
+  -H "Content-Type: application/json" \
+  -d '{"text":"demo"}'</div>
+    </div>
+    <div class="row">
+      <span class="label">Ở đâu:</span>
+      <span class="value">Terminal 2 hoặc 3</span>
+    </div>
+    <div class="row">
+      <span class="label">Cách đọc kết quả:</span>
+      <span class="value"><b>HTTP/1.1 200 OK</b> + body <b>{"received": {"text": "demo"}}</b>.</span>
+    </div>
+    <div class="highlight-box">
+      <div class="highlight-title">Ý nghĩa:</div>
+      <div class="highlight-text">POST request có body JSON → proxy forward → backend xử lý logic → response JSON. Non-blocking HTTP request-response.</div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <h2 class="step-title">Bước 4: Xác thực người dùng (Login)</h2>
+    <div class="row">
+      <span class="label">Viết lệnh gì:</span>
+      <div class="cmd-box">curl -i -X POST http://127.0.0.1:9001/login \
+  -H "Content-Type: application/json" \
+  -d '{"user":"student","pass":"pass123"}'</div>
+    </div>
+    <div class="row">
+      <span class="label">Ở đâu:</span>
+      <span class="value">Terminal 2 hoặc 3 (ghi chú: 9001 là backend trực tiếp, không qua proxy)</span>
+    </div>
+    <div class="row">
+      <span class="label">Cách đọc kết quả:</span>
+      <span class="value"><b>HTTP/1.1 200 OK</b> + header <b>Set-Cookie: sessionid=...</b> + body <b>{"message": "login ok", "session": "..."}</b>.</span>
+    </div>
+    <div class="highlight-box">
+      <div class="highlight-title">Ý nghĩa:</div>
+      <div class="highlight-text">Backend xác thực (authentication) bằng JSON body. Trả về session ID lưu trong cookie để duy trì phiên làm việc.</div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <h2 class="step-title">Bước 5: Kiểm tra session (Who am I)</h2>
+    <div class="row">
+      <span class="label">Viết lệnh gì:</span>
+      <div class="cmd-box">curl -i -X GET http://127.0.0.1:9001/whoami \
+  -H "Cookie: sessionid=<paste_sessionid_from_bước_4>"</div>
+    </div>
+    <div class="row">
+      <span class="label">Ở đâu:</span>
+      <span class="value">Terminal 2 hoặc 3 (dán sessionid từ Bước 4)</span>
+    </div>
+    <div class="row">
+      <span class="label">Cách đọc kết quả:</span>
+      <span class="value">Nếu session đúng: <b>HTTP/1.1 200 OK</b> + body <b>{"authenticated": true, "user": "student"}</b>.</span>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <h2 class="step-title">Bước 6: Demo Peer-to-Peer (P2P) – Chuẩn bị</h2>
+    <div class="row">
+      <span class="label">Mở thêm 2 terminal mới:</span>
+      <span class="value">Terminal 3 và Terminal 4 để chạy 2 app độc lập.</span>
+    </div>
+    <div class="row">
+      <span class="label">QUAN TRỌNG:</span>
+      <span class="value">Đóng Terminal 1 (hoặc chạy ./stop-dev.sh) để giải phóng port 9001 cho P2P app mới.</span>
+    </div>
+    <div class="highlight-box">
+      <div class="highlight-title">Tại sao:</div>
+      <div class="highlight-text">Port 9001 hiện bị chiếm bởi Backend từ ./run-dev.sh. Nếu không dừng, app P2P mới sẽ bị lỗi "Address already in use".</div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <h2 class="step-title">Bước 7: Chạy App 1 (Peer 1) – port 9001</h2>
+    <div class="row">
+      <span class="label">Viết lệnh gì:</span>
+      <div class="cmd-box">cd /workspaces/Mmt.assignment
+source .venv/bin/activate
+python3 CO3094-asynaprous/start_sampleapp.py --server-port 9001</div>
+    </div>
+    <div class="row">
+      <span class="label">Ở đâu:</span>
+      <span class="value">Terminal 3</span>
+    </div>
+    <div class="row">
+      <span class="label">Cách đọc kết quả:</span>
+      <span class="value">Nhìn thấy "Starting sampleapp on port 9001" và không có lỗi port "Address already in use" là OK.</span>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <h2 class="step-title">Bước 8: Chạy App 2 (Peer 2) – port 9002</h2>
+    <div class="row">
+      <span class="label">Viết lệnh gì:</span>
+      <div class="cmd-box">cd /workspaces/Mmt.assignment
+source .venv/bin/activate
+python3 CO3094-asynaprous/start_sampleapp.py --server-port 9002</div>
+    </div>
+    <div class="row">
+      <span class="label">Ở đâu:</span>
+      <span class="value">Terminal 4</span>
+    </div>
+    <div class="row">
+      <span class="label">Cách đọc kết quả:</span>
+      <span class="value">Nhìn thấy "Starting sampleapp on port 9002" là 2 peer đã chạy độc lập.</span>
+    </div>
+    <div class="highlight-box">
+      <div class="highlight-title">Ý nghĩa để nói với thầy:</div>
+      <div class="highlight-text">"Đây là Peer-to-Peer: mỗi app là một <b>peer</b> chạy độc lập trên port khác nhau. Thay vì client-server, 2 app sẽ trao đổi với nhau qua HTTP."</div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <h2 class="step-title">Bước 9: Kết nối Peer 1 với Peer 2</h2>
+    <div class="row">
+      <span class="label">Viết lệnh gì:</span>
+      <div class="cmd-box">curl -i -X POST http://127.0.0.1:9001/connect-peer \
+  -H "Content-Type: application/json" \
+  -d '{"peer_ip":"127.0.0.1","peer_port":9002}'</div>
+    </div>
+    <div class="row">
+      <span class="label">Ở đâu:</span>
+      <span class="value">Terminal 2 hoặc 5 (terminal test mới)</span>
+    </div>
+    <div class="row">
+      <span class="label">Giải thích:</span>
+      <span class="value">App 1 (9001) ghi nhớ rằng App 2 (9002) là một peer để có thể gửi message tới.</span>
+    </div>
+    <div class="row">
+      <span class="label">Cách đọc kết quả:</span>
+      <span class="value"><b>HTTP/1.1 200 OK</b> + body <b>{"status": "connected"}</b>.</span>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <h2 class="step-title">Bước 10: Gửi message từ Peer 1 tới Peer 2</h2>
+    <div class="row">
+      <span class="label">Viết lệnh gì:</span>
+      <div class="cmd-box">curl -i -X POST http://127.0.0.1:9001/send-peer \
+  -H "Content-Type: application/json" \
+  -d '{"peer_ip":"127.0.0.1","peer_port":9002,"message":"Xin chào từ Peer 1"}'</div>
+    </div>
+    <div class="row">
+      <span class="label">Ở đâu:</span>
+      <span class="value">Terminal 2 hoặc 5</span>
+    </div>
+    <div class="row">
+      <span class="label">Cách đọc kết quả:</span>
+      <span class="value"><b>HTTP/1.1 200 OK</b>. Đây là non-blocking HTTP POST. Response là 200 ngay mà không chờ Peer 2 xử lý xong.</span>
+    </div>
+    <div class="highlight-box">
+      <div class="highlight-title">Ý nghĩa:</div>
+      <div class="highlight-text">Peer 1 gửi HTTP POST tới Peer 2. <b>Non-blocking</b>: Peer 1 trả 200 ngay rồi tiếp tục chạy. Peer 2 xử lý message ở background (asyncio event loop).</div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <h2 class="step-title">Bước 11: Kiểm tra log để thấy message được nhận</h2>
+    <div class="row">
+      <span class="label">Viết lệnh gì (Terminal 2 hoặc 5):</span>
+      <div class="cmd-box">tail -20 logs/sampleapp.log</div>
+    </div>
+    <div class="row">
+      <span class="label">Giải thích:</span>
+      <span class="value">Xem log ghi chép các request và xử lý P2P. Sẽ thấy dòng "[P2P] Received message from peer: ..." chứng minh message từ Peer 1 đã nhận được ở Peer 2.</span>
+    </div>
+    <div class="row">
+      <span class="label">Cách đọc kết quả:</span>
+      <span class="value">Tìm dòng <b>"[P2P] Received message from peer: {'peer_ip': '127.0.0.1', 'peer_port': 9001, 'message': 'Xin chào từ Peer 1'}"</b> là chứng minh P2P hoạt động.</span>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <h2 class="step-title">Bước 12: Dừng dịch vụ</h2>
+    <div class="row">
+      <span class="label">Viết lệnh gì:</span>
+      <div class="cmd-box"># Nếu dùng ./run-dev.sh
+./stop-dev.sh
+
+# Hoặc Ctrl+C ở Terminal 3 và 4 nếu chạy P2P</div>
+    </div>
+    <div class="row">
+      <span class="label">Cách đọc kết quả:</span>
+      <span class="value">Nhìn thấy "Killing PID ... Stopped dev services" hoặc "^C" terminate process là OK.</span>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <h2 class="step-title">Bước 13: Lý thuyết cần nhớ</h2>
+    <div class="row">
+      <span class="label">HTTP request/response:</span>
+      <span class="value">Request có method (GET/POST), path (/login), header, body. Response có status (200/401), header, body.</span>
+    </div>
+    <div class="row">
+      <span class="label">Proxy:</span>
+      <span class="value">Nhận request ở port 8080 rồi chuyển tiếp đến backend (9001) phù hợp dựa trên hostname/routing rule.</span>
+    </div>
+    <div class="row">
+      <span class="label">Non-blocking I/O:</span>
+      <span class="value">Đang chờ I/O (mạng, file) thì không dừng toàn bộ luồng; event loop có thể xử lý việc khác cùng lúc.</span>
+    </div>
+    <div class="row">
+      <span class="label">Coroutine (async/await):</span>
+      <span class="value">Hàm async trả về coroutine object; phải await hoặc gọi lại event loop, nếu không sẽ có cảnh báo "never awaited".</span>
+    </div>
+    <div class="row">
+      <span class="label">Peer-to-Peer (P2P):</span>
+      <span class="value">Mỗi app là peer; kết nối với peer khác qua HTTP POST (không có central server/proxy ở giữa). Dùng async để gửi message không blocking.</span>
+    </div>
+    <div class="row">
+      <span class="label">Log file:</span>
+      <span class="value">Dùng để chứng minh request đã chạy, debug lỗi runtime, và theo dõi quá trình xử lý.</span>
+    </div>
+    <div class="row">
+      <span class="label">PID file:</span>
+      <span class="value">Lưu mã tiến trình (process ID) để stop đúng process đã start.</span>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <h2 class="step-title">Bước 14: Cheat sheet – Lệnh tối thiểu</h2>
+    <div class="row">
+      <span class="label">Scenario 1: Demo Client-Server đơn giản (5 phút):</span>
+      <div class="cmd-box"># Terminal 1
+cd /workspaces/Mmt.assignment
+./run-dev.sh
+
+# Terminal 2
+curl -i http://127.0.0.1:8080/getlist -H "Host: localhost:8080"
+curl -i -X POST http://127.0.0.1:8080/echo \
+  -H "Host: localhost:8080" \
+  -H "Content-Type: application/json" \
+  -d '{"text":"demo"}'
+
+# Dừng
+./stop-dev.sh</div>
+    </div>
+    <div class="row">
+      <span class="label">Scenario 2: Demo P2P (10 phút):</span>
+      <div class="cmd-box"># Terminal 1
+cd /workspaces/Mmt.assignment
+source .venv/bin/activate
+python3 CO3094-asynaprous/start_sampleapp.py --server-port 9001
+
+# Terminal 2
+cd /workspaces/Mmt.assignment
+source .venv/bin/activate
+python3 CO3094-asynaprous/start_sampleapp.py --server-port 9002
+
+# Terminal 3 (test)
+curl -X POST http://127.0.0.1:9001/connect-peer \
+  -H "Content-Type: application/json" \
+  -d '{"peer_ip":"127.0.0.1","peer_port":9002}'
+
+curl -X POST http://127.0.0.1:9001/send-peer \
+  -H "Content-Type: application/json" \
+  -d '{"peer_ip":"127.0.0.1","peer_port":9002,"message":"Xin chào"}'
+
+tail -20 logs/sampleapp.log</div>
+    </div>
+    <div class="row">
+      <span class="label">Thông điệp tối thiểu để nói với thầy:</span>
+      <span class="value">✓ Khởi động được 2 instance (proxy+backend hoặc 2 peer). ✓ GET/POST trả 200 + JSON hợp lệ. ✓ Log chứng minh request nhận được. ✓ P2P: peer kết nối và gửi message qua HTTP async (non-blocking).</span>
+    </div>
+  </div>
+
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Kịch Bản Demo Mạng Máy Tính</title>
+  <style>
+    :root {
+      --bg: #f3f4f6;
+      --card-bg: #ffffff;
+      --text: #1f2937;
+      --primary: #2563eb;
+      --success: #16a34a;
+      --danger: #dc2626;
+      --highlight-bg: #fffbeb;
+      --highlight-border: #f59e0b;
+      --code-bg: #1e293b;
+      --code-text: #e2e8f0;
+      --label-color: #64748b;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      margin: 0;
+      padding: 10px;
+      font-size: 16px;
+    }
+
+    h1 {
+      text-align: center;
+      color: var(--primary);
+      font-size: 1.5rem;
+      margin-bottom: 5px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: var(--label-color);
+      font-size: 0.9rem;
+      margin-bottom: 20px;
+    }
+
+    .step-card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      border-top: 4px solid var(--primary);
+    }
+
+    .step-title {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: var(--primary);
+      margin-top: 0;
+      margin-bottom: 15px;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 5px;
+    }
+
+    .row {
+      margin-bottom: 10px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .label {
+      font-weight: bold;
+      color: var(--label-color);
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .value {
+      font-size: 1rem;
+    }
+
+    .cmd-box {
+      background: var(--code-bg);
+      color: var(--code-text);
+      padding: 10px;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 0.9rem;
+      overflow-x: auto;
+      margin-top: 5px;
+      border-left: 4px solid var(--success);
+    }
+
+    /* Khung Highlight "Ăn Điểm" */
+    .highlight-box {
+      background-color: var(--highlight-bg);
+      border: 2px solid var(--highlight-border);
+      border-radius: 8px;
+      padding: 12px;
+      margin-top: 15px;
+    }
+
+    .highlight-title {
+      color: #b45309;
+      font-weight: bold;
+      <!DOCTYPE html>
+      <html lang="vi">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <title>Kịch bản demo mạng máy tính</title>
+        <style>
+          :root {
+            --bg: #f3f4f6;
+            --card-bg: #ffffff;
+            --text: #1f2937;
+            --primary: #2563eb;
+            --success: #16a34a;
+            --highlight-bg: #fffbeb;
+            --highlight-border: #f59e0b;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            --label-color: #64748b;
+          }
+
+          body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            margin: 0;
+            padding: 10px;
+            font-size: 16px;
+          }
+
+          h1 {
+            text-align: center;
+            color: var(--primary);
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+          }
+
+          .subtitle {
+            text-align: center;
+            color: var(--label-color);
+            font-size: 0.95rem;
+            margin-bottom: 20px;
+          }
+
+          .step-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border-top: 4px solid var(--primary);
+          }
+
+          .step-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin-top: 0;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 5px;
+          }
+
+          .row {
+            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+          }
+
+          .label {
+            font-weight: bold;
+            color: var(--label-color);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+          }
+
+          .value {
+            font-size: 1rem;
+          }
+
+          .cmd-box {
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 10px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 0.92rem;
+            overflow-x: auto;
+            margin-top: 5px;
+            border-left: 4px solid var(--success);
+            white-space: pre-wrap;
+            word-break: break-word;
+          }
+
+          .highlight-box {
+            background-color: var(--highlight-bg);
+            border: 2px solid var(--highlight-border);
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 15px;
+          }
+
+          .highlight-title {
+            color: #b45309;
+            font-weight: bold;
+            font-size: 1.05rem;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+          }
+
+          .highlight-text {
+            color: #92400e;
+            font-size: 0.95rem;
+            font-weight: 500;
+          }
+
+          .highlight-text b {
+            color: #78350f;
+            background-color: #fde68a;
+            padding: 0 4px;
+            border-radius: 3px;
+          }
+        </style>
+      </head>
+      <body>
+
+        <h1>Kịch bản demo bảo vệ</h1>
+        <div class="subtitle">Vuốt để đọc. Mỗi lệnh có giải thích và cách đọc kết quả ngay bên dưới.</div>
+
+        <div class="step-card">
+          <h2 class="step-title">Bước 0: Chuẩn bị</h2>
+          <div class="row">
+            <span class="label">Viết lệnh gì:</span>
+            <div class="cmd-box">cd /workspaces/Mmt.assignment</div>
+          </div>
+          <div class="row">
+            <span class="label">Ở đâu:</span>
+            <span class="value">Terminal 1</span>
+          </div>
+          <div class="row">
+            <span class="label">Giải thích:</span>
+            <span class="value">Di chuyển vào thư mục chứa mã nguồn để gọi các script thực thi.</span>
+          </div>
+          <div class="row">
+            <span class="label">Cách đọc kết quả:</span>
+            <span class="value">Nếu không có lỗi thì terminal trở về dấu nhắc bình thường và sẵn sàng chạy lệnh tiếp theo.</span>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <h2 class="step-title">Bước 1: Khởi động hệ thống</h2>
+          <div class="row">
+            <span class="label">Viết lệnh gì:</span>
+            <div class="cmd-box">./run-dev.sh</div>
+          </div>
+          <div class="row">
+            <span class="label">Ở đâu:</span>
+            <span class="value">Terminal 1</span>
+          </div>
+          <div class="row">
+            <span class="label">Giải thích:</span>
+            <span class="value">Lệnh này bật đồng thời 2 tiến trình: Proxy Server ở cổng 8080 và Backend Server ở cổng 9001.</span>
+          </div>
+          <div class="row">
+            <span class="label">Cách đọc kết quả:</span>
+            <span class="value">Nhìn thấy các dòng Starting sampleapp..., Starting proxy..., Services started... là hệ thống đã chạy xong.</span>
+          </div>
+          <div class="highlight-box">
+            <div class="highlight-title">Ý nghĩa để nói với thầy:</div>
+            <div class="highlight-text">"Thưa thầy, lệnh này mở 2 socket TCP ở trạng thái <b>LISTEN</b>. <b>Proxy (8080)</b> làm trạm trung chuyển nhận request rồi forward, còn <b>Backend (9001)</b> xử lý logic. Kiến trúc này đúng kiểu client-server và là nền cho cơ chế non-blocking của hệ thống."</div>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <h2 class="step-title">Bước 2: Lấy danh sách peer</h2>
+          <div class="row">
+            <span class="label">Viết lệnh gì:</span>
+            <div class="cmd-box">curl -i http://127.0.0.1:8080/get-list -H "Host: localhost:8080"</div>
+          </div>
+          <div class="row">
+            <span class="label">Ở đâu:</span>
+            <span class="value">Terminal 2, để Terminal 1 tiếp tục chạy nền</span>
+          </div>
+          <div class="row">
+            <span class="label">Giải thích:</span>
+            <span class="value">Gửi một request HTTP GET vào proxy để hỏi danh sách các peer đang online.</span>
+          </div>
+          <div class="row">
+            <span class="label">Cách đọc kết quả:</span>
+            <span class="value">Dòng đầu phải là <b>HTTP/1.1 200 OK</b>. Phần header có <b>Content-Type: application/json</b>. Sau dòng trống là body JSON, ví dụ <b>{"active_peers": []}</b>. Body này chứng minh request đã đi qua proxy và backend đã trả dữ liệu thật.</span>
+          </div>
+          <div class="highlight-box">
+            <div class="highlight-title">Ý nghĩa để nói với thầy:</div>
+            <div class="highlight-text">"Lệnh GET này chứng minh mô hình chat hybrid hoạt động ở tầng tracker. Tracker lưu danh sách peer online, và khi em gọi <b>/get-list</b> thì server trả về <b>active_peers</b>. Đây là bước nền cho hệ thống chat client-server, sau đó các peer mới dùng danh sách này để chuyển sang mô hình P2P."</div>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <h2 class="step-title">Bước 3: Kiểm tra body response bằng POST /echo</h2>
+          <div class="row">
+            <span class="label">Viết lệnh gì:</span>
+            <div class="cmd-box">curl -i -X POST http://127.0.0.1:8080/echo -H "Host: localhost:8080" -H "Content-Type: application/json" -d '{"text":"demo"}'</div>
+          </div>
+          <div class="row">
+            <span class="label">Ở đâu:</span>
+            <span class="value">Terminal 2</span>
+          </div>
+          <div class="row">
+            <span class="label">Giải thích:</span>
+            <span class="value">Lệnh này gửi JSON lên server để kiểm tra route POST và cách backend đọc body request.</span>
+          </div>
+          <div class="row">
+            <span class="label">Cách đọc kết quả:</span>
+            <span class="value">Nếu chạy đúng sẽ thấy <b>HTTP/1.1 200 OK</b> và body trả lại chính dữ liệu vừa gửi, ví dụ <b>{"received": {"text": "demo"}}</b>. Đây là bằng chứng backend đã parse request và dựng response thành công.</span>
+          </div>
+          <div class="highlight-box">
+            <div class="highlight-title">Ý nghĩa để nói với thầy:</div>
+            <div class="highlight-text">"Endpoint echo cho thấy hệ thống HTTP của em đọc được payload, xử lý route, rồi trả body đúng định dạng RESTful. Phần body không phải phụ, mà chính là dữ liệu server trả về sau khi xử lý xong request."</div>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <h2 class="step-title">Bước 4: Kiểm tra xác thực bằng POST /login</h2>
+          <div class="row">
+            <span class="label">Viết lệnh gì:</span>
+            <div class="cmd-box">curl -i -X POST http://127.0.0.1:8080/login -H "Host: localhost:8080" -H "Content-Type: application/json" -d '{"text":"abc"}'</div>
+          </div>
+          <div class="row">
+            <span class="label">Ở đâu:</span>
+            <span class="value">Terminal 2</span>
+          </div>
+          <div class="row">
+            <span class="label">Giải thích:</span>
+            <span class="value">Dùng để thử cơ chế xác thực. Nếu chưa có quyền hoặc chưa gửi đúng thông tin, server sẽ từ chối.</span>
+          </div>
+          <div class="row">
+            <span class="label">Cách đọc kết quả:</span>
+            <span class="value">Nếu bị chặn thì phải thấy <b>HTTP/1.1 401 ERROR</b>. Header có thể có <b>WWW-Authenticate</b>. Điều này cho thấy endpoint đang kiểm tra quyền truy cập đúng nghĩa HTTP.</span>
+          </div>
+          <div class="highlight-box">
+            <div class="highlight-title">Ý nghĩa để nói với thầy:</div>
+            <div class="highlight-text">"Phần login chứng minh hệ thống không chỉ có route đơn giản mà còn có cơ chế auth. Khi chưa xác thực, server trả 401. Điều đó đúng với phần authentication được mô tả trong báo cáo."</div>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <h2 class="step-title">Bước 5: Xem log để chứng minh request đã vào server</h2>
+          <div class="row">
+            <span class="label">Viết lệnh gì:</span>
+            <div class="cmd-box">tail -n 20 logs/sampleapp.log
+      tail -n 20 logs/proxy.log</div>
+          </div>
+          <div class="row">
+            <span class="label">Ở đâu:</span>
+            <span class="value">Terminal 2 hoặc Terminal 3</span>
+          </div>
+          <div class="row">
+            <span class="label">Giải thích:</span>
+            <span class="value">Log giúp chứng minh request đã đi vào backend và proxy thật, không phải output giả lập.</span>
+          </div>
+          <div class="row">
+            <span class="label">Cách đọc kết quả:</span>
+            <span class="value">Tìm các dòng có GET /get-list, POST /echo, POST /login. Nếu thấy RuntimeWarning hoặc lỗi coroutine thì đó là lỗi async cần nói trong báo cáo, không phải lỗi của terminal.</span>
+          </div>
+          <div class="highlight-box">
+            <div class="highlight-title">Ý nghĩa để nói với thầy:</div>
+            <div class="highlight-text">"Log là bằng chứng tầng dưới. Nó cho thấy request đã được xử lý thật trong backend, giúp em đối chiếu giữa lệnh curl, response và luồng xử lý nội bộ."</div>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <h2 class="step-title">Bước 6: Tắt hệ thống</h2>
+          <div class="row">
+            <span class="label">Viết lệnh gì:</span>
+            <div class="cmd-box">./stop-dev.sh</div>
+          </div>
+          <div class="row">
+            <span class="label">Ở đâu:</span>
+            <span class="value">Terminal 1 hoặc Terminal 2 đều được</span>
+          </div>
+          <div class="row">
+            <span class="label">Giải thích:</span>
+            <span class="value">Lệnh này đọc PID file và tắt đúng sampleapp + proxy đã được bật trước đó.</span>
+          </div>
+          <div class="row">
+            <span class="label">Cách đọc kết quả:</span>
+            <span class="value">Phải thấy dòng <b>Killing PID ...</b> và <b>Stopped dev services...</b>. Sau đó terminal quay lại dấu nhắc bình thường.</span>
+          </div>
+          <div class="highlight-box">
+            <div class="highlight-title">Ý nghĩa để nói với thầy:</div>
+            <div class="highlight-text">"Em quản lý tiến trình bằng PID file để dừng đúng service, tránh để tiến trình treo sau khi demo. Đây là phần thao tác vận hành hệ thống, không chỉ là code."</div>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <h2 class="step-title">Bước 7: Non-blocking nằm ở đâu</h2>
+          <div class="row">
+            <span class="label">Giải thích ngắn:</span>
+            <span class="value">Non-blocking không phải là giao diện đẹp, mà là cách server xử lý request bất đồng bộ qua asyncio, coroutine và await.</span>
+          </div>
+          <div class="row">
+            <span class="label">Trong report:</span>
+            <span class="value">Phần <b>TRIỂN KHAI CƠ CHẾ NON-BLOCKING</b> nói rõ server dùng coroutine và event loop, không chặn toàn bộ hệ thống khi đang chờ I/O.</span>
+          </div>
+          <div class="row">
+            <span class="label">Trong demo:</span>
+            <span class="value">./run-dev.sh mở đồng thời proxy 8080 và backend 9001, curl vào 8080 vẫn trả response ngay, logs cho thấy request được đọc và xử lý theo luồng I/O không đồng bộ.</span>
+          </div>
+          <div class="highlight-box">
+            <div class="highlight-title">Câu chốt để nói với thầy:</div>
+            <div class="highlight-text">"Non-blocking được thể hiện ở chỗ server vẫn chấp nhận request mới trong khi đang chờ I/O của request trước. Em chứng minh bằng việc mở hệ thống, bắn request qua proxy, rồi xem response và log chạy bình thường."</div>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <h2 class="step-title">Bước 8: Script nói sẵn</h2>
+          <div class="row">
+            <span class="label">Mở đầu:</span>
+            <span class="value">"Nhóm em xây dựng hệ thống HTTP non-blocking gồm proxy 8080 và backend 9001. Em sẽ demo theo luồng bật hệ thống, gửi request, đọc response và đối chiếu log."</span>
+          </div>
+          <div class="row">
+            <span class="label">Khi chạy GET:</span>
+            <span class="value">"Em gửi GET /get-list qua proxy. Kết quả 200 OK và body JSON chứng minh request đi qua hệ thống đúng như thiết kế."</span>
+          </div>
+          <div class="row">
+            <span class="label">Khi chạy POST /echo:</span>
+            <span class="value">"Em gửi POST /echo kèm JSON text. Server trả lại chính payload đã gửi, chứng minh route POST và parse JSON hoạt động đúng."</span>
+          </div>
+          <div class="row">
+            <span class="label">Khi chạy login:</span>
+            <span class="value">"Em gửi POST /login không có auth, server trả 401 Unauthorized, đúng với cơ chế xác thực HTTP."</span>
+          </div>
+          <div class="row">
+            <span class="label">Khi chốt demo:</span>
+            <span class="value">"Em dùng log và PID file để quản lý tiến trình, sau đó stop-dev.sh để tắt sạch hệ thống."</span>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <h2 class="step-title">Bước 9: Lý thuyết cần nhớ</h2>
+          <div class="row">
+            <span class="label">HTTP request/response:</span>
+            <span class="value">Request có method, path, header, body. Response có status, header, body.</span>
+          </div>
+          <div class="row">
+            <span class="label">Proxy:</span>
+            <span class="value">Nhận request ở 8080 rồi chuyển tiếp đến backend phù hợp.</span>
+          </div>
+          <div class="row">
+            <span class="label">Non-blocking:</span>
+            <span class="value">Đang chờ I/O thì không dừng toàn bộ luồng; event loop có thể xử lý việc khác.</span>
+          </div>
+          <div class="row">
+            <span class="label">Coroutine:</span>
+            <span class="value">Hàm async trả về coroutine object; không await thì sẽ có cảnh báo never awaited.</span>
+          </div>
+          <div class="row">
+            <span class="label">Log:</span>
+            <span class="value">Dùng để chứng minh request đã chạy và để debug lỗi runtime.</span>
+          </div>
+          <div class="row">
+            <span class="label">PID file:</span>
+            <span class="value">Lưu mã tiến trình để stop đúng process đã start.</span>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <h2 class="step-title">Bước 10: Cheat sheet</h2>
+          <div class="row">
+            <span class="label">Lệnh tối thiểu:</span>
+            <div class="cmd-box">cd /workspaces/Mmt.assignment
+      ./run-dev.sh
+      curl -i http://127.0.0.1:8080/get-list -H "Host: localhost:8080"
+      curl -i -X POST http://127.0.0.1:8080/echo -H "Host: localhost:8080" -H "Content-Type: application/json" -d '{"text":"demo"}'
+      ./stop-dev.sh</div>
+          </div>
+          <div class="row">
+            <span class="label">Thông điệp tối thiểu:</span>
+            <span class="value">Đã start được proxy và backend. GET và POST trả 200 + JSON hợp lệ. Đã stop sạch process theo PID.</span>
+          </div>
+        </div>
+
+      </body>
+      </html>

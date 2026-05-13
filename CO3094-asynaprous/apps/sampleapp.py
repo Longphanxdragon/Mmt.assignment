@@ -292,13 +292,22 @@ async def send_peer(headers, body):
         msg_info = json.loads(body)
         sender = msg_info.get('sender', 'anonymous')
         target_peer_id = msg_info.get('target_peer_id')
+        target_ip = msg_info.get('target_ip')
+        target_port = msg_info.get('target_port')
         content = msg_info.get('content', '')
-        
-        # Find target peer
-        target_peer = next(
-            (p for p in active_peers if p.get('peer_id') == target_peer_id),
-            None
-        )
+
+        if target_ip and target_port:
+            target_peer = {
+                "peer_id": target_peer_id or f"{target_ip}:{target_port}",
+                "ip": target_ip,
+                "port": target_port,
+            }
+        else:
+            # Find target peer from local cache if caller only supplies peer_id.
+            target_peer = next(
+                (p for p in active_peers if p.get('peer_id') == target_peer_id),
+                None
+            )
         
         if not target_peer:
             return _json_tuple({"error": "target peer not found"}, 404)
@@ -331,4 +340,14 @@ async def send_peer(headers, body):
         })
     except Exception as e:
         return _json_tuple({"error": str(e)}, 400)
+
+@app.route('/get-messages', methods=['GET'])
+def get_messages(headers=None, body=""):
+    """
+    Get all messages stored locally (for debugging/UI).
+    """
+    return _json_tuple({
+        "messages": chat_messages,
+        "total": len(chat_messages)
+    })
 

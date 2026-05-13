@@ -83,6 +83,44 @@ class HttpAdapter:
         #: Response
         self.response = Response()
 
+    def _cors_headers(self, origin="*"):
+        return {
+            "Access-Control-Allow-Origin": origin,
+            "Access-Control-Allow-Methods": "GET, POST, PUT, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type, Authorization, Cookie",
+            "Access-Control-Allow-Credentials": "true",
+            "Vary": "Origin",
+        }
+
+    def _build_json_response(self, body_obj, status=200, extra_headers=None, origin="*"):
+        import json
+
+        if isinstance(body_obj, (bytes, bytearray)):
+            body_bytes = bytes(body_obj)
+        else:
+            if not isinstance(body_obj, (str, dict, list)):
+                body_obj = str(body_obj)
+            body_text = json.dumps(body_obj) if isinstance(body_obj, (dict, list)) else str(body_obj)
+            body_bytes = body_text.encode("utf-8")
+
+        status_text = "OK" if int(status) == 200 else "ERROR"
+        header_text = (
+            f"HTTP/1.1 {status} {status_text}\r\n"
+            f"Content-Type: application/json\r\n"
+            f"Content-Length: {len(body_bytes)}\r\n"
+        )
+        for key, value in self._cors_headers(origin=origin).items():
+            header_text += f"{key}: {value}\r\n"
+        for key, value in (extra_headers or {}).items():
+            header_text += f"{key}: {value}\r\n"
+        return header_text.encode("utf-8") + b"\r\n" + body_bytes
+
+    def _build_options_response(self, origin="*"):
+        header_text = "HTTP/1.1 204 No Content\r\nContent-Length: 0\r\n"
+        for key, value in self._cors_headers(origin=origin).items():
+            header_text += f"{key}: {value}\r\n"
+        return header_text.encode("utf-8") + b"\r\n"
+
     def handle_client(self, conn, addr, routes):
         """Handle one client connection in blocking/threaded mode."""
 
@@ -93,36 +131,20 @@ class HttpAdapter:
         msg = conn.recv(1024).decode()
         req.prepare(msg, routes)
         print("[HttpAdapter] Invoke handle_client connection {}".format(addr))
+        origin = req.headers.get("origin", "*") if req.headers else "*"
+
+        if req.method == "OPTIONS":
+            conn.sendall(self._build_options_response(origin=origin))
+            conn.close()
+            return
 
         if req.hook:
-            import json
-
             hook_result = req.hook(headers=req.headers, body=req.body)
             if isinstance(hook_result, tuple):
                 body_obj, extra_headers, status = hook_result
-                if isinstance(body_obj, (bytes, bytearray)):
-                    body_bytes = bytes(body_obj)
-                else:
-                    if not isinstance(body_obj, (str, dict, list)):
-                        body_obj = str(body_obj)
-                    body_text = json.dumps(body_obj) if isinstance(body_obj, (dict, list)) else str(body_obj)
-                    body_bytes = body_text.encode("utf-8")
-
-                status_text = "OK" if int(status) == 200 else "ERROR"
-                header_text = f"HTTP/1.1 {status} {status_text}\r\nContent-Type: application/json\r\nContent-Length: {len(body_bytes)}\r\n"
-                for key, value in (extra_headers or {}).items():
-                    header_text += f"{key}: {value}\r\n"
-                response = header_text.encode("utf-8") + b"\r\n" + body_bytes
+                response = self._build_json_response(body_obj, status=status, extra_headers=extra_headers, origin=origin)
             else:
-                if isinstance(hook_result, (bytes, bytearray)):
-                    body_bytes = bytes(hook_result)
-                else:
-                    body_text = json.dumps(hook_result) if isinstance(hook_result, dict) else str(hook_result)
-                    body_bytes = body_text.encode("utf-8")
-                response = (
-                    f"HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {len(body_bytes)}\r\n\r\n".encode("utf-8")
-                    + body_bytes
-                )
+                response = self._build_json_response(hook_result, origin=origin)
         else:
             response = resp.build_response(req)
 
@@ -140,10 +162,14 @@ class HttpAdapter:
 
         msg = await reader.read(1024)
         req.prepare(msg.decode("utf-8"), routes=self.routes)
+        origin = req.headers.get("origin", "*") if req.headers else "*"
+
+        if req.method == "OPTIONS":
+            writer.write(self._build_options_response(origin=origin))
+            await writer.drain()
+            return
 
         if req.hook:
-            import json
-
             if inspect.iscoroutinefunction(req.hook):
                 hook_result = await req.hook(headers=req.headers, body=req.body)
             else:
@@ -151,29 +177,9 @@ class HttpAdapter:
 
             if isinstance(hook_result, tuple):
                 body_obj, extra_headers, status = hook_result
-                if isinstance(body_obj, (bytes, bytearray)):
-                    body_bytes = bytes(body_obj)
-                else:
-                    if not isinstance(body_obj, (str, dict, list)):
-                        body_obj = str(body_obj)
-                    body_text = json.dumps(body_obj) if isinstance(body_obj, (dict, list)) else str(body_obj)
-                    body_bytes = body_text.encode("utf-8")
-
-                status_text = "OK" if int(status) == 200 else "ERROR"
-                header_text = f"HTTP/1.1 {status} {status_text}\r\nContent-Type: application/json\r\nContent-Length: {len(body_bytes)}\r\n"
-                for key, value in (extra_headers or {}).items():
-                    header_text += f"{key}: {value}\r\n"
-                response = header_text.encode("utf-8") + b"\r\n" + body_bytes
+                response = self._build_json_response(body_obj, status=status, extra_headers=extra_headers, origin=origin)
             else:
-                if isinstance(hook_result, (bytes, bytearray)):
-                    body_bytes = bytes(hook_result)
-                else:
-                    body_text = json.dumps(hook_result) if isinstance(hook_result, dict) else str(hook_result)
-                    body_bytes = body_text.encode("utf-8")
-                response = (
-                    f"HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {len(body_bytes)}\r\n\r\n".encode("utf-8")
-                    + body_bytes
-                )
+                response = self._build_json_response(hook_result, origin=origin)
         else:
             response = resp.build_response(req)
 
@@ -182,72 +188,16 @@ class HttpAdapter:
 
     @property
     def extract_cookies(self, req, resp):
-        """
-        Build cookies from the :class:`Request <Request>` headers.
-
-        :param req:(Request) The :class:`Request <Request>` object.
-        :param resp: (Response) The res:class:`Response <Response>` object.
-        :rtype: cookies - A dictionary of cookie key-value pairs.
-        """
-        cookies = {}
-        for header in headers:
-            if header.startswith("Cookie:"):
-                cookie_str = header.split(":", 1)[1].strip()
-                for pair in cookie_str.split(";"):
-                    key, value = pair.strip().split("=")
-                    cookies[key] = value
-        return cookies
+        """Legacy helper kept for compatibility."""
+        return {}
 
     def build_response(self, req, resp):
-        """Builds a :class:`Response <Response>` object 
-
-        :param req: The :class:`Request <Request>` used to generate the response.
-        :param resp: The  response object.
-        :rtype: Response
-        """
-        response = Response()
-
-        # Set encoding.
-        response.encoding = get_encoding_from_headers(response.headers)
-        response.raw = resp
-        response.reason = response.raw.reason
-
-        if isinstance(req.url, bytes):
-            response.url = req.url.decode("utf-8")
-        else:
-            response.url = req.url
-
-        # Add new cookies from the server.
-        response.cookies = extract_cookies(req)
-
-        # Give the Response some context.
-        response.request = req
-        response.connection = self
-
-        return response
+        """Legacy helper kept for compatibility."""
+        return Response(req)
 
     def build_json_response(self, req, resp):
-        """Builds a :class:`Response <Response>` object from JSON data
-
-        :param req: The :class:`Request <Request>` used to generate the response.
-        :param resp: The  response object.
-        :rtype: Response
-        """
-        response = Response(req)
-
-        # Set encoding.
-        response.raw = resp
-
-        if isinstance(req.url, bytes):
-            response.url = req.url.decode("utf-8")
-        else:
-            response.url = req.url
-
-        # Give the Response some context.
-        response.request = req
-        response.connection = self
-
-        return response
+        """Legacy helper kept for compatibility."""
+        return Response(req)
 
 
     # def get_connection(self, url, proxies=None):
