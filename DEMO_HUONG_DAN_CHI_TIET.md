@@ -308,10 +308,10 @@ python3 CO3094-asynaprous/start_sampleapp.py --server-port 9005
 ```
 
 Buoc 3 - Mo 4 tab browser khac nhau
-- Trang 1: `http://127.0.0.1:8001/chat.html?name=alice&peerport=9002&tracker=127.0.0.1:9001`
-- Trang 2: `http://127.0.0.1:8001/chat.html?name=bob&peerport=9003&tracker=127.0.0.1:9001`
-- Trang 3: `http://127.0.0.1:8001/chat.html?name=charlie&peerport=9004&tracker=127.0.0.1:9001`
-- Trang 4: `http://127.0.0.1:8001/chat.html?name=dave&peerport=9005&tracker=127.0.0.1:9001`
+- Trang 1: `http://127.0.0.1:8001/chat.html?name=alice&peerport=9002&tracker=localhost:9001`
+- Trang 2: `http://127.0.0.1:8001/chat.html?name=bob&peerport=9003&tracker=localhost:9001`
+- Trang 3: `http://127.0.0.1:8001/chat.html?name=charlie&peerport=9004&tracker=localhost:9001`
+- Trang 4: `http://127.0.0.1:8001/chat.html?name=dave&peerport=9005&tracker=localhost:9001`
 
 Buoc 4 - Dang nhap va dang ky tracker
 - Moi tab nhap `student / pass123` roi bam `Login + Register`.
@@ -341,3 +341,52 @@ Buoc 7 - Tat he thong
 
 Script noi san
 - "Phan demo chat khong con la broadcast trong browser. Em dung mot tracker de luu danh sach peer online, moi peer co mot server rieng, browser UI login vao tung peer server bang session cookie, sau do lay peer list va gui tin qua /send-peer. Khi em nhan Login + Register va chat giua 4 trang, do la dang chay backend HTTP that, vua co auth vua co trao doi P2P giua cac tien trinh."
+
+--------------------------------------------------
+PHAN 10 - KET QUA THUC TE (SMOKE TESTS)
+--------------------------------------------------
+
+Duoi day la cac lenh va ket qua minh da chay tren moi server (tat ca tren localhost). Ban co the copy/paste cac lenh nay khi demo.
+
+1) Login (curl) - sample
+```
+HTTP/1.1 200 OK
+Set-Cookie: sessionid=fe3797d7...; Path=/; HttpOnly
+{"message": "login ok", "session": "fe3797d7..."}
+```
+
+2) Whoami - sample
+```
+HTTP/1.1 200 OK
+{"authenticated": true, "session": "fe3797d7...", "user": "student"}
+```
+
+3) Tracker list after registering peers
+```
+{
+  "active_peers": [
+    {"peer_id":"alice","ip":"127.0.0.1","port":9002},
+    {"peer_id":"bob","ip":"127.0.0.1","port":9003},
+    {"peer_id":"charlie","ip":"127.0.0.1","port":9004},
+    {"peer_id":"dave","ip":"127.0.0.1","port":9005}
+  ]
+}
+```
+
+4) Direct send (alice -> bob)
+```
+{"status":"message_sent","target":"bob","message":{"sender":"alice","target_peer_id":"bob","content":"Xin chao Bob","type":"direct","timestamp":1}}
+```
+
+5) Bob's messages after receive
+```
+{
+  "messages": [
+    {"sender":"alice","target_peer_id":"bob","content":"hello bob after await fix","type":"direct","timestamp":0},
+    {"sender":"alice","target_peer_id":"bob","content":"Xin chao Bob","type":"direct","timestamp":1}
+  ],
+  "total": 2
+}
+```
+
+Ghi chu: cac ket qua tren cho thay cac endpoint chinh hoat dong: `/login`, `/whoami`, `/submit-info`, `/get-list`, `/send-peer`, va `/get-messages`.

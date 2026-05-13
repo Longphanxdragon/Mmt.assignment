@@ -1,0 +1,58 @@
+# Demo UI simulation - curl outputs (captured)
+
+## Commands run
+# Login alice
+curl -sS -i -X POST http://127.0.0.1:9002/login -u student:pass123 -c /tmp/alice_cookie.txt
+
+# Whoami alice
+curl -sS -i http://127.0.0.1:9002/whoami -b /tmp/alice_cookie.txt
+
+# Register peers with tracker
+curl -sS -X POST http://127.0.0.1:9001/submit-info -H 'Content-Type: application/json' -d '{"peer_id":"alice","ip":"127.0.0.1","port":9002}'
+curl -sS -X POST http://127.0.0.1:9001/submit-info -H 'Content-Type: application/json' -d '{"peer_id":"bob","ip":"127.0.0.1","port":9003}'
+curl -sS -X POST http://127.0.0.1:9001/submit-info -H 'Content-Type: application/json' -d '{"peer_id":"charlie","ip":"127.0.0.1","port":9004}'
+curl -sS -X POST http://127.0.0.1:9001/submit-info -H 'Content-Type: application/json' -d '{"peer_id":"dave","ip":"127.0.0.1","port":9005}'
+
+# Get tracker list
+curl -sS http://127.0.0.1:9001/get-list
+
+# Send direct alice->bob
+curl -sS -X POST http://127.0.0.1:9002/send-peer -H 'Content-Type: application/json' -d '{"sender":"alice","target_peer_id":"bob","target_ip":"127.0.0.1","target_port":9003,"content":"Xin chao Bob"}'
+
+# Fetch bob messages
+curl -sS http://127.0.0.1:9003/get-messages
+
+
+## Observed outputs (trimmed)
+
+--- LOGIN alice (9002)
+HTTP/1.1 200 OK
+Content-Type: application/json
+Set-Cookie: sessionid=fe3797d71455cbf05d2ebca2bb8253c1; Path=/; HttpOnly
+{"message": "login ok", "session": "fe3797d71455cbf05d2ebca2bb8253c1"}
+
+--- WHOAMI alice
+HTTP/1.1 200 OK
+{"authenticated": true, "session": "fe3797d71455cbf05d2ebca2bb8253c1", "user": "student"}
+
+--- TRACKER LIST
+{
+  "active_peers": [
+    {"peer_id": "alice", "ip": "127.0.0.1", "port": 9002},
+    {"peer_id": "bob", "ip": "127.0.0.1", "port": 9003},
+    {"peer_id": "charlie", "ip": "127.0.0.1", "port": 9004},
+    {"peer_id": "dave", "ip": "127.0.0.1", "port": 9005}
+  ]
+}
+
+--- SEND direct alice->bob
+{"status": "message_sent", "target": "bob", "message": {"sender": "alice", "target_peer_id": "bob", "content": "Xin chao Bob", "type": "direct", "timestamp": 1}}
+
+--- BOB MESSAGES
+{
+  "messages": [
+    {"sender": "alice", "target_peer_id": "bob", "content": "hello bob after await fix", "type": "direct", "timestamp": 0},
+    {"sender": "alice", "target_peer_id": "bob", "content": "Xin chao Bob", "type": "direct", "timestamp": 1}
+  ],
+  "total": 2
+}
