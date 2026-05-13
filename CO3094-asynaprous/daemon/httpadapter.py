@@ -121,6 +121,65 @@ class HttpAdapter:
             header_text += f"{key}: {value}\r\n"
         return header_text.encode("utf-8") + b"\r\n"
 
+    def _content_length_from_request(self, request_text):
+        for line in request_text.split("\r\n"):
+            if line.lower().startswith("content-length:"):
+                try:
+                    return int(line.split(":", 1)[1].strip())
+                except Exception:
+                    return 0
+        return 0
+
+    def _read_full_request_sync(self, conn):
+        data = b""
+        header_end = -1
+        content_length = None
+
+        while True:
+            chunk = conn.recv(4096)
+            if not chunk:
+                break
+
+            data += chunk
+
+            if header_end == -1:
+                header_end = data.find(b"\r\n\r\n")
+                if header_end != -1:
+                    header_text = data[:header_end].decode("utf-8", errors="replace")
+                    content_length = self._content_length_from_request(header_text)
+
+            if header_end != -1 and content_length is not None:
+                total_needed = header_end + 4 + content_length
+                if len(data) >= total_needed:
+                    break
+
+        return data.decode("utf-8", errors="replace")
+
+    async def _read_full_request_async(self, reader):
+        data = b""
+        header_end = -1
+        content_length = None
+
+        while True:
+            chunk = await reader.read(4096)
+            if not chunk:
+                break
+
+            data += chunk
+
+            if header_end == -1:
+                header_end = data.find(b"\r\n\r\n")
+                if header_end != -1:
+                    header_text = data[:header_end].decode("utf-8", errors="replace")
+                    content_length = self._content_length_from_request(header_text)
+
+            if header_end != -1 and content_length is not None:
+                total_needed = header_end + 4 + content_length
+                if len(data) >= total_needed:
+                    break
+
+        return data.decode("utf-8", errors="replace")
+
     def handle_client(self, conn, addr, routes):
         """Handle one client connection in blocking/threaded mode."""
 
@@ -128,7 +187,7 @@ class HttpAdapter:
         req = self.request
         resp = self.response
 
-        msg = conn.recv(1024).decode()
+        msg = self._read_full_request_sync(conn)
         req.prepare(msg, routes)
         print("[HttpAdapter] Invoke handle_client connection {}".format(addr))
         origin = req.headers.get("origin", "*") if req.headers else "*"
@@ -140,6 +199,8 @@ class HttpAdapter:
 
         if req.hook:
             hook_result = req.hook(headers=req.headers, body=req.body)
+            if inspect.isawaitable(hook_result):
+                hook_result = asyncio.run(hook_result)
             if isinstance(hook_result, tuple):
                 body_obj, extra_headers, status = hook_result
                 response = self._build_json_response(body_obj, status=status, extra_headers=extra_headers, origin=origin)
@@ -160,8 +221,8 @@ class HttpAdapter:
         addr = writer.get_extra_info("peername")
         print("[HttpAdapter] Invoke handle_client_coroutine connection {}".format(addr))
 
-        msg = await reader.read(1024)
-        req.prepare(msg.decode("utf-8"), routes=self.routes)
+        msg = await self._read_full_request_async(reader)
+        req.prepare(msg, routes=self.routes)
         origin = req.headers.get("origin", "*") if req.headers else "*"
 
         if req.method == "OPTIONS":
@@ -174,6 +235,8 @@ class HttpAdapter:
                 hook_result = await req.hook(headers=req.headers, body=req.body)
             else:
                 hook_result = req.hook(headers=req.headers, body=req.body)
+                if inspect.isawaitable(hook_result):
+                    hook_result = await hook_result
 
             if isinstance(hook_result, tuple):
                 body_obj, extra_headers, status = hook_result

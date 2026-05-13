@@ -230,7 +230,7 @@
 
       <div class="field">
         <label>Tracker URL</label>
-        <input id="trackerUrl" type="text" value="127.0.0.1:9001">
+        <input id="trackerUrl" type="text" value="localhost:9001">
       </div>
 
       <div class="field">
@@ -284,8 +284,8 @@
     const params = new URLSearchParams(location.search);
     const defaultName = params.get('name') || 'alice';
     const defaultPeerPort = params.get('peerport') || '9002';
-    const defaultTracker = params.get('tracker') || '127.0.0.1:9001';
-    const defaultPeerUrl = params.get('peer') || `127.0.0.1:${defaultPeerPort}`;
+    const defaultTracker = params.get('tracker') || 'localhost:9001';
+    const defaultPeerUrl = params.get('peer') || `localhost:${defaultPeerPort}`;
 
     const nameInput = document.getElementById('nameInput');
     const trackerUrlInput = document.getElementById('trackerUrl');
@@ -307,10 +307,12 @@
     let myPeerUrl = defaultPeerUrl;
     let trackerUrl = defaultTracker;
     let currentPeer = '';
+    let currentPeerInfo = null;
     let loginOk = false;
     let pollTimer = null;
     let heartbeatTimer = null;
     let selfRegisterTimer = null;
+    let knownPeers = [];
     const seenIds = new Set();
 
     function now() { return Date.now(); }
@@ -320,8 +322,45 @@
       statusBox.className = kind ? `status ${kind}` : 'status';
     }
 
+    function inferPortFromHostname(hostname) {
+      const m = String(hostname || '').match(/-(\d+)\./);
+      return m ? m[1] : '';
+    }
+
+    function parseEndpoint(base) {
+      const raw = String(base || '').trim();
+      if (!raw) return { protocol: '', hostname: '', port: '' };
+
+      const normalized = /^https?:\/\//i.test(raw) ? raw : `http://${raw}`;
+      const u = new URL(normalized);
+      const port = u.port || inferPortFromHostname(u.hostname) || (u.protocol === 'https:' ? '443' : '80');
+      return { protocol: u.protocol, hostname: u.hostname, port };
+    }
+
+    function resolveCodespacesHost(port) {
+      const currentHost = String(location.hostname || '');
+      const m = currentHost.match(/^(.*)-\d+(\..+)$/);
+      if (!m || !port) return '';
+      return `${m[1]}-${port}${m[2]}`;
+    }
+
     function apiUrl(base, path) {
-      return `http://${base}${path}`;
+      const raw = String(base || '').trim();
+      if (!raw) return path;
+
+      if (/^https?:\/\//i.test(raw)) {
+        return `${raw.replace(/\/$/, '')}${path}`;
+      }
+
+      if (location.hostname.endsWith('.app.github.dev')) {
+        const { port } = parseEndpoint(raw);
+        const forwardedHost = resolveCodespacesHost(port);
+        if (forwardedHost) {
+          return `${location.protocol}//${forwardedHost}${path}`;
+        }
+      }
+
+      return `http://${raw}${path}`;
     }
 
     async function apiCall(base, path, options = {}) {
@@ -330,7 +369,7 @@
       const fetchOptions = { ...options, signal: controller.signal };
       try {
         const fullUrl = apiUrl(base, path);
-        console.log('[apiCall] GET', fullUrl, fetchOptions);
+        console.log('[apiCall]', fetchOptions.method || 'GET', fullUrl, fetchOptions);
         const resp = await fetch(fullUrl, fetchOptions);
         const text = await resp.text();
         console.log('[apiCall] Response', resp.status, text.substring(0, 100));
@@ -366,9 +405,6 @@
       try {
         const { resp, data } = await apiCall(myPeerUrl, '/login', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
           body: JSON.stringify({ user, pass }),
         });
 
@@ -379,13 +415,13 @@
         loginOk = true;
 
         // Register with tracker after login succeeds.
+        const myEndpoint = parseEndpoint(myPeerUrl);
         const registerResult = await apiCall(trackerUrl, '/submit-info', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             peer_id: myPeerId,
-            ip: myPeerUrl.split(':')[0],
-            port: parseInt(myPeerUrl.split(':')[1], 10),
+            ip: myEndpoint.hostname,
+            port: parseInt(myEndpoint.port, 10),
           }),
         });
 
@@ -430,13 +466,13 @@
 
     async function registerSelf() {
       try {
+        const myEndpoint = parseEndpoint(myPeerUrl);
         await apiCall(trackerUrl, '/submit-info', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             peer_id: myPeerId,
-            ip: myPeerUrl.split(':')[0],
-            port: parseInt(myPeerUrl.split(':')[1], 10),
+            ip: myEndpoint.hostname,
+            port: parseInt(myEndpoint.port, 10),
           }),
         });
       } catch (e) {
@@ -449,14 +485,21 @@
         const { resp, data } = await apiCall(trackerUrl, '/get-list', { method: 'GET' });
         if (!resp.ok) throw new Error(data && data.error ? data.error : `HTTP ${resp.status}`);
         const peers = (data && data.active_peers) ? data.active_peers : [];
+        knownPeers = peers;
         renderPeers(peers);
       } catch (err) {
-        setStatus(`Refresh failed: ${err.message}`, 'error');
+        // Tracker can be turned off after discovery; keep using cached peers.
+        if (knownPeers.length > 0) {
+          renderPeers(knownPeers);
+          setStatus('Tracker offline, dùng danh sách peer đã cache', '');
+        } else {
+          setStatus(`Refresh failed: ${err.message}`, 'error');
+        }
       }
     }
 
     function renderPeers(peers = null) {
-      const currentList = peers || [];
+      const currentList = peers || knownPeers || [];
       const filtered = currentList.filter(p => p.peer_id !== myPeerId);
       if (filtered.length === 0) {
         peersList.innerHTML = '<div class="peer"><div class="name">Chưa có peer</div><div class="meta">Mở thêm trang khác hoặc kiểm tra tracker</div></div>';
@@ -474,6 +517,11 @@
         item.onclick = () => {
           const peerId = item.getAttribute('data-peer-id');
           currentPeer = peerId;
+          currentPeerInfo = {
+            peer_id: peerId,
+            ip: item.getAttribute('data-ip'),
+            port: parseInt(item.getAttribute('data-port'), 10),
+          };
           document.querySelectorAll('.peer').forEach(p => p.classList.remove('active'));
           item.classList.add('active');
           const peerName = peerId;
@@ -495,20 +543,29 @@
         return;
       }
 
-      const peersResult = await apiCall(trackerUrl, '/get-list', { method: 'GET' });
-      const peers = (peersResult.data && peersResult.data.active_peers) ? peersResult.data.active_peers : [];
-      const target = peers.find(p => p.peer_id === currentPeer);
+      let target = null;
+      try {
+        const peersResult = await apiCall(trackerUrl, '/get-list', { method: 'GET' });
+        if (peersResult.resp.ok) {
+          knownPeers = (peersResult.data && peersResult.data.active_peers) ? peersResult.data.active_peers : [];
+        }
+      } catch (e) {
+        // Tracker can be offline; fallback to cached/selected peer.
+      }
+
+      target = knownPeers.find(p => p.peer_id === currentPeer);
+      if (!target && currentPeerInfo) {
+        target = currentPeerInfo;
+      }
+
       if (!target) {
-        setStatus('Không tìm thấy peer đích trong tracker', 'error');
+        setStatus('Không tìm thấy địa chỉ peer đích', 'error');
         return;
       }
 
       try {
         const { resp, data } = await apiCall(myPeerUrl, '/send-peer', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
           body: JSON.stringify({
             sender: myPeerId,
             target_peer_id: target.peer_id,
